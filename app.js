@@ -1,7 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   let map = null;
-
+  let selectedLocation = {
+  lat: 35.8,
+  lon: 10.7,
+  name: "Tunisie"
+  };
   // =========================
   // MAP
   // =========================
@@ -134,7 +138,11 @@ document.addEventListener("DOMContentLoaded", () => {
           alert("Lieu introuvable : " + query);
           return;
         }
-
+        selectedLocation = {
+        lat: lat,
+        lon: lon,
+        name: result.address || query
+        };
         const result = data.candidates[0];
 
         const lat = result.location.y;
