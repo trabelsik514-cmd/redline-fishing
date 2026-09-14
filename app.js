@@ -205,4 +205,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
   }
 
-});
+// =========================
+// SEARCH LOCATION
+// =========================
+
+const searchInput = document.querySelector(".search input");
+
+if (searchInput && typeof map !== "undefined") {
+
+  searchInput.addEventListener("keydown", async (event) => {
+
+    if (event.key !== "Enter") return;
+
+    const query = searchInput.value.trim();
+
+    if (!query) return;
+
+    try {
+
+      const url =
+        "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates" +
+        "?SingleLine=" + encodeURIComponent(query) +
+        "&maxLocations=5" +
+        "&outFields=Match_addr,PlaceName,City,Region,Country" +
+        "&outSR=4326" +
+        "&f=json";
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error("Erreur de recherche");
+      }
+
+      const data = await response.json();
+
+      if (!data.candidates || data.candidates.length === 0) {
+        alert("Lieu introuvable : " + query);
+        return;
+      }
+
+      const result = data.candidates[0];
+
+      const lat = result.location.y;
+      const lon = result.location.x;
+
+      map.setView([lat, lon], 12);
+
+      L.marker([lat, lon])
+        .addTo(map)
+        .bindPopup(
+          "<b>" +
+          (result.address || query) +
+          "</b>"
+        )
+        .openPopup();
+
+    } catch (error) {
+
+      console.error("Erreur recherche :", error);
+
+      alert(
+        "Impossible d'effectuer la recherche pour le moment."
+      );
+    }
+
+  });
+
+}});
