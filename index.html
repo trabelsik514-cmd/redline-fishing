@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#071a2b">
+<title>RED LINE FISHING</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="header">
+  <div class="logo"><img src="assets/red-line-fishing-logo.png" alt="RED LINE FISHING"></div>
+  <div class="search"><span>⌕</span><input placeholder="Rechercher un lieu (ex : Tunis, Djerba, Mahdia...)"></div>
+  <div class="header-actions">
+    <button class="lang active">🌐 FR</button><button class="lang" id="arBtn">عربي AR</button>
+    <button class="icon-btn">🔔<i></i></button><button class="icon-btn">♙</button><button class="icon-btn">☰</button>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="leftbar">
+  <button class="nav active" data-view="map">🗺️ <b>Carte</b></button>
+  <button class="nav" data-view="weather">☁️ <b>Météo & Mer</b></button>
+  <button class="nav" data-view="fishing">🐟 <b>Pêche</b></button>
+  <button class="nav" data-view="species">🐠 <b>Espèces</b></button>
+  <button class="nav" data-view="zones">📍 <b>Zones</b></button>
+  <button class="nav" data-view="forecast">▣ <b>Prévisions</b></button>
+  <button class="nav" data-view="fav">☆ <b>Favoris</b></button>
+  <button class="nav" data-view="settings">⚙ <b>Paramètres</b></button>
+  <div class="tagline">Plus qu'une carte...<strong>votre allié en mer</strong></div>
+</aside>
+
+<main class="main">
+<section class="map-area" id="mapView">
+  <div id="map"></div>
+  <div class="compass"><span>N</span><span>E</span><span>S</span><span>W</span><strong>◆</strong></div>
+  <div class="zoom"><button id="plus">+</button><button id="minus">−</button></div>
+  <div class="map-layers">
+    <div class="tabs">
+      <button class="tab active" data-layer="wind">💨<span>Vent</span></button>
+      <button class="tab" data-layer="waves">〰<span>Vagues</span></button>
+      <button class="tab" data-layer="currents">⟳<span>Courants</span></button>
+      <button class="tab" data-layer="temp">♨<span>Température</span></button>
+    </div>
+    <div class="legend"><div class="legend-title">💨 Vitesse du vent</div><div class="gradient"></div><div class="nums"><span>0</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30+</span></div></div>
+    <div class="toggles">
+      <label>💨 <span>Vent</span><input type="checkbox" checked><em></em></label>
+      <label>〰 <span>Vagues</span><input type="checkbox"><em></em></label>
+      <label>⟳ <span>Courants</span><input type="checkbox"><em></em></label>
+      <label>♨ <span>Température</span><input type="checkbox"><em></em></label>
+    </div>
+  </div>
+  <div class="layers-box">
+    <h3>Couches</h3>
+    <label>🐚 <span>Fond marin</span><input type="checkbox"><em></em></label>
+    <label>🎣 <span>Zones de pêche</span><input type="checkbox" checked><em></em></label>
+    <label>🌿 <span>Habitat</span><input type="checkbox" checked><em></em></label>
+    <label>🐟 <span>Espèces</span><input type="checkbox"><em></em></label>
+  </div>
+  <div class="bottom-cards">
+    <div class="info-card"><b>🌤️</b><span>Météo actuelle</span><strong id="temp">22°C</strong><small>Vent 15 nd</small></div>
+    <div class="info-card"><b>🌊</b><span>Hauteur des vagues</span><strong id="wave">1.2 m</strong><small>Période 6 s</small></div>
+    <div class="info-card"><b>💨</b><span>Vent</span><strong id="wind">15 nd</strong><small>NE (45°)</small></div>
+    <div class="info-card"><b>🐟</b><span>Meilleures zones de pêche</span><strong>Daurade · Loup · Sar</strong><small>Zones recommandées</small></div>
+    <div class="info-card"><b>★</b><span>Espèces recommandées</span><strong>12 espèces</strong><small>Selon conditions</small></div>
+  </div>
+</section>
+
+<section class="content-view hidden" id="contentView">
+  <div class="content-head"><span class="pill">RED LINE FISHING</span><h1 id="contentTitle">Météo & Mer</h1><p id="contentText">Sélectionnez une rubrique dans le menu.</p></div>
+  <div class="content-grid" id="contentGrid"></div>
+</section>
+</main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
