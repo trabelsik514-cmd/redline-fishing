@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Red Line Fishing</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
-<link rel="stylesheet" <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script srchttps://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{font-family:'Segoe UI',Tahoma,sans-serif}
@@ -41,6 +40,7 @@ body.light{background:#e2e8f0;color:#0f172a}
       <button onclick="authEnter()" class="flex-1 bg-red-600 rounded-full py-2.5 text-sm font-bold">🚪 دخول</button>
       <button onclick="authRegister()" class="flex-1 border border-red-600 rounded-full py-2.5 text-sm font-bold text-red-500">✍️ اشتراك</button>
     </div>
+    <button onclick="resetPass()" class="text-[11px] text-gray-400 underline mt-3">🔑 نسيت كلمة السر؟ / Mot de passe oublié ?</button>
     <p class="text-[10px] text-gray-500 mt-4">🐟 Red Line Fishing — رفيق الصياد في البحر<br>Entrer / S'inscrire</p>
   </div>
 </div>
@@ -131,7 +131,7 @@ body.light{background:#e2e8f0;color:#0f172a}
   <button onclick="openSpecies()" class="flex flex-col items-center px-2">🐠<span data-i18n="especes">Espèces</span></button>
   <button onclick="togglePanel('forecastPanel')" class="flex flex-col items-center px-2">📅<span data-i18n="previsions">Prév.</span></button>
   <button onclick="openFavs()" class="flex flex-col items-center px-2">⭐<span data-i18n="favoris">Favoris</span></button>
-  <button onclick="logoutUser()" class="flex flex-col items-center px-2">🚪<span data-i18n="login">Compte</span></button>
+  <button onclick="logoutUser()" class="flex flex-col items-center px-2">🚪<span>Compte</span></button>
 </nav>
 
 <div id="speciesModal" class="fixed inset-0 bg-black/70 z-[3000] hidden items-center justify-center p-3">
@@ -160,14 +160,16 @@ var lang='fr',isDark=true,zoneMarkers=[],waveGroup=null,currentLat=36.8,currentL
 
 /* ===== نظام الاشتراك والدخول ===== */
 function getUsers(){return JSON.parse(localStorage.getItem('rlf_users')||'{}')}
+function showAuthMsg(t,col){var err=document.getElementById('authError');err.textContent=t;err.classList.remove('hidden');err.style.color=col||'#ef4444'}
+function hideAuthMsg(){document.getElementById('authError').classList.add('hidden')}
+
 function authRegister(){
   var u=document.getElementById('authUser').value.trim();
   var p=document.getElementById('authPass').value;
-  var err=document.getElementById('authError');
-  if(u.length<3){err.textContent='⚠️ الاسم قصير / Pseudo trop court';err.classList.remove('hidden');return}
-  if(p.length<4){err.textContent='⚠️ كلمة السر 4 أحرف على الأقل / 4 caractères min';err.classList.remove('hidden');return}
+  if(u.length<3){showAuthMsg('⚠️ الاسم قصير / Pseudo trop court');return}
+  if(p.length<4){showAuthMsg('⚠️ كلمة السر 4 أحرف على الأقل / 4 caractères min');return}
   var users=getUsers();
-  if(users[u]){err.textContent='⚠️ الاسم موجود — ادخل مباشرة / Déjà pris';err.classList.remove('hidden');return}
+  if(users[u]){showAuthMsg('⚠️ الاسم موجود — ادخل مباشرة / Déjà pris');return}
   users[u]=p;
   localStorage.setItem('rlf_users',JSON.stringify(users));
   localStorage.setItem('rlf_user',u);
@@ -176,12 +178,24 @@ function authRegister(){
 function authEnter(){
   var u=document.getElementById('authUser').value.trim();
   var p=document.getElementById('authPass').value;
-  var err=document.getElementById('authError');
   var users=getUsers();
-  if(!users[u]){err.textContent='⚠️ غير مسجل — اشترك أولاً / Inscris-toi';err.classList.remove('hidden');return}
-  if(users[u]!==p){err.textContent='⚠️ كلمة السر خاطئة / Mot de passe faux';err.classList.remove('hidden');return}
+  if(!users[u]){showAuthMsg('⚠️ غير مسجل — اشترك أولاً / Inscris-toi');return}
+  if(users[u]!==p){showAuthMsg('⚠️ كلمة السر خاطئة / Mot de passe faux');return}
   localStorage.setItem('rlf_user',u);
   enterApp(u);
+}
+function resetPass(){
+  var u=document.getElementById('authUser').value.trim();
+  if(!u){showAuthMsg('⚠️ اكتب اسمك أولاً في خانة الاسم / Écris ton pseudo');return}
+  var users=getUsers();
+  if(!users[u]){showAuthMsg('⚠️ الاسم غير موجود / Pseudo introuvable');return}
+  if(confirm('حذف الحساب "'+u+'" وإعادة الاشتراك بكلمة سر جديدة؟')){
+    delete users[u];
+    localStorage.setItem('rlf_users',JSON.stringify(users));
+    localStorage.removeItem('rlf_user');
+    showAuthMsg('✅ تم حذف الحساب — اكتب الاسم وكلمة سر جديدة واضغط اشتراك','#22c55e');
+    document.getElementById('authPass').value='';
+  }
 }
 function enterApp(u){
   document.getElementById('authScreen').style.display='none';
@@ -260,8 +274,8 @@ function toggleTheme(){
 
 /* ===== الترجمة ===== */
 var i18n={
- fr:{carte:"Carte",meteo:"Météo",especes:"Espèces",zones:"Zones",previsions:"Prévisions 7 jours",favoris:"Favoris",couches:"Couches",fond:"Fond marin",zonesP:"Zones de pêche",habitat:"Habitat",meteoAct:"Météo actuelle",vaguesF:"Vagues",ventF:"Vent",meilleures:"Meilleures zones",windLabel:"🌬️ Vitesse du vent",search:"🔍 Rechercher...",slogan:"Plus qu'une carte...<br><b>votre allié en mer</b>",waves:"Vagues",favTitle:"Mes Favoris",login:"Compte"},
- ar:{carte:"الخريطة",meteo:"الطقس",especes:"الأنواع",zones:"المناطق",previsions:"توقعات 7 أيام",favoris:"المفضلة",couches:"الطبقات",fond:"قاع البحر",zonesP:"مناطق الصيد",habitat:"الموطن",meteoAct:"الطقس الحالي",vaguesF:"الأمواج",ventF:"الرياح",meilleures:"أفضل المناطق",windLabel:"🌬️ سرعة الرياح",search:"🔍 ابحث عن مكان...",slogan:"أكثر من خريطة...<br><b>رفيقك في البحر</b>",waves:"الأمواج",favTitle:"مفضلتي",login:"حسابي"}
+ fr:{carte:"Carte",meteo:"Météo",especes:"Espèces",zones:"Zones",previsions:"Prévisions 7 jours",favoris:"Favoris",couches:"Couches",fond:"Fond marin",zonesP:"Zones de pêche",habitat:"Habitat",meteoAct:"Météo actuelle",vaguesF:"Vagues",ventF:"Vent",meilleures:"Meilleures zones",windLabel:"🌬️ Vitesse du vent",search:"🔍 Rechercher...",slogan:"Plus qu'une carte...<br><b>votre allié en mer</b>",waves:"Vagues",favTitle:"Mes Favoris"},
+ ar:{carte:"الخريطة",meteo:"الطقس",especes:"الأنواع",zones:"المناطق",previsions:"توقعات 7 أيام",favoris:"المفضلة",couches:"الطبقات",fond:"قاع البحر",zonesP:"مناطق الصيد",habitat:"الموطن",meteoAct:"الطقس الحالي",vaguesF:"الأمواج",ventF:"الرياح",meilleures:"أفضل المناطق",windLabel:"🌬️ سرعة الرياح",search:"🔍 ابحث عن مكان...",slogan:"أكثر من خريطة...<br><b>رفيقك في البحر</b>",waves:"الأمواج",favTitle:"مفضلتي"}
 };
 function toggleLang(){
   lang=(lang==='fr')?'ar':'fr';
@@ -351,7 +365,10 @@ function addFav(lat,lon,name){
   for(var i=0;i<favs.length;i++){if(favs[i].name===name)return}
   favs.push({lat:lat,lon:lon,name:name});
   localStorage.setItem('rlf_favs',JSON.stringify(favs));
-  function renderFavs(){
+  renderFavs();
+}
+function delFav(i){favs.splice(i,1);localStorage.setItem('rlf_favs',JSON.stringify(favs));renderFavs()}
+function renderFavs(){
   var box=document.getElementById('favList');
   if(!favs.length){box.innerHTML='<p class="text-gray-400 text-xs">Aucun favori / لا مفضلة بعد</p>';return}
   var html='';
@@ -361,20 +378,7 @@ function addFav(lat,lon,name){
   });
   box.innerHTML=html;
 }
-
-}
-function delFav(i){favs.splice(i,1);localStorage.setItem('rlf_favs',JSON.stringify(favs));renderFavs()}
-function renderFavs(){
-  var box=document.getElementById('favList');
-  if(!favs.length){box.innerHTML='<p class="text-gray-400 text-xs">Aucun favori / لا مفضلة بعد</p>';return}
-  var html='';
-  favs.forEach(function(f,i){
-    var n=f.name.replace(/'/g,"");
-    html+='<div class="flex justify-between items-center glass rounded-xl p-2"><span class="cursor-pointer hover:text-red-400" onclick="goTo('+f.lat+','+f.lon+',\''+n+'\closeModal(\'favModal\')">📍 '+f.name+'</span><button onclick="delFav('+i+')" class="text-red-500">🗑️</button></div>';
-  });
-  box.innerHTML=html;
-}
-function openFavs(){renderFavs();openModal('favModal')}
+function openFavs(){renderFavs();openModal('fav')}
 
 /* ===== الأنواع ===== */
 function renderSpecies(filter){
