@@ -172,8 +172,8 @@ document.getElementById('authScreen').style.display='flex';
 document.getElementById('logoutBtn').classList.add('hidden')}});
 
 var map=L.map('map',{zoomControl:false}).setView([36.8,11.5],7);
-var satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri'}).addTo(map);
-var darkLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'CARTO'});
+var darkLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'CARTO'});var oceanLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri Ocean'});
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
