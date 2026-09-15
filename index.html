@@ -1,80 +1,344 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#071a2b">
-<title>RED LINE FISHING</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red Line Fishing</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body{font-family:'Segoe UI',Tahoma,sans-serif}
+  .sidebar-item:hover{background:rgba(220,38,38,.2)}
+  .sidebar-item.active{background:#dc2626}
+  .glass{background:rgba(10,20,40,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1)}
+  body.light .glass{background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.1);color:#0f172a}
+  body.light{background:#e2e8f0;color:#0f172a}
+  .fish-pin{background:#dc2626;width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+  .fish-pin span{transform:rotate(45deg);font-size:16px}
+  .switch{width:44px;height:22px;background:#374151;border-radius:99px;position:relative;cursor:pointer;transition:.3s;flex-shrink:0}
+  .switch.on{background:#dc2626}
+  .switch::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s}
+  .switch.on::after{left:25px}
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#dc2626;border-radius:9px}
+</style>
 </head>
-<body>
-<header class="header">
-  <div class="logo"><img src="assets/red-line-fishing-logo.png" alt="RED LINE FISHING"></div>
-  <div class="search"><span>⌕</span><input placeholder="Rechercher un lieu (ex : Tunis, Djerba, Mahdia...)"></div>
-  <div class="header-actions">
-    <button class="lang active">🌐 FR</button><button class="lang" id="arBtn">عربي AR</button>
-    <button class="icon-btn">🔔<i></i></button><button class="icon-btn">♙</button><button class="icon-btn">☰</button>
+<body class="bg-slate-950 text-white h-screen overflow-hidden flex flex-col pb-14 md:pb-0">
+
+<!-- ===== الهيدر ===== -->
+<header class="glass flex items-center gap-2 md:gap-4 px-3 py-2 z-20">
+  <div class="flex items-center gap-2">
+    <span class="text-2xl md:text-3xl">🐟</span>
+    <div>
+      <h1 class="font-black text-lg md:text-xl italic"><span class="text-red-600">RED</span> LINE</h1>
+      <p class="text-[9px] md:text-[10px] tracking-[5px] text-gray-400">FISHING</p>
+    </div>
+  </div>
+  <div class="flex-1 relative">
+    <input id="searchInput" type="text" oninput="searchPlace(this.value)" placeholder="🔍 Rechercher un lieu..."
+      class="w-full bg-slate-800/80 rounded-full px-4 md:px-5 py-2 text-sm outline-none focus:ring-2 ring-red-600">
+    <div id="searchResults" class="absolute top-full left-0 right-0 mt-1 glass rounded-xl hidden max-h-60 overflow-y-auto z-[2000]"></div>
+  </div>
+  <div class="flex gap-1 md:gap-2 items-center">
+    <button onclick="toggleLang()" class="bg-red-600 rounded-full px-3 md:px-4 py-1.5 text-sm font-bold" id="langBtn">🌐 FR</button>
+    <button onclick="toggleTheme()" class="text-lg md:text-xl" id="themeBtn">🌙</button>
+    <button onclick="openLogin()" class="text-lg md:text-xl" id="loginBtn">👤</button>
   </div>
 </header>
 
-<div class="layout">
-<aside class="leftbar">
-  <button class="nav active" data-view="map">🗺️ <b>Carte</b></button>
-  <button class="nav" data-view="weather">☁️ <b>Météo & Mer</b></button>
-  <button class="nav" data-view="fishing">🐟 <b>Pêche</b></button>
-  <button class="nav" data-view="species">🐠 <b>Espèces</b></button>
-  <button class="nav" data-view="zones">📍 <b>Zones</b></button>
-  <button class="nav" data-view="forecast">▣ <b>Prévisions</b></button>
-  <button class="nav" data-view="fav">☆ <b>Favoris</b></button>
-  <button class="nav" data-view="settings">⚙ <b>Paramètres</b></button>
-  <div class="tagline">Plus qu'une carte...<strong>votre allié en mer</strong></div>
-</aside>
+<div class="flex flex-1 overflow-hidden">
 
-<main class="main">
-<section class="map-area" id="mapView">
-  <div id="map"></div>
-  <div class="compass"><span>N</span><span>E</span><span>S</span><span>W</span><strong>◆</strong></div>
-  <div class="zoom"><button id="plus">+</button><button id="minus">−</button></div>
-  <div class="map-layers">
-    <div class="tabs">
-      <button class="tab active" data-layer="wind">💨<span>Vent</span></button>
-      <button class="tab" data-layer="waves">〰<span>Vagues</span></button>
-      <button class="tab" data-layer="currents">⟳<span>Courants</span></button>
-      <button class="tab" data-layer="temp">♨<span>Température</span></button>
-    </div>
-    <div class="legend"><div class="legend-title">💨 Vitesse du vent</div><div class="gradient"></div><div class="nums"><span>0</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30+</span></div></div>
-    <div class="toggles">
-      <label>💨 <span>Vent</span><input type="checkbox" checked><em></em></label>
-      <label>〰 <span>Vagues</span><input type="checkbox"><em></em></label>
-      <label>⟳ <span>Courants</span><input type="checkbox"><em></em></label>
-      <label>♨ <span>Température</span><input type="checkbox"><em></em></label>
-    </div>
-  </div>
-  <div class="layers-box">
-    <h3>Couches</h3>
-    <label>🐚 <span>Fond marin</span><input type="checkbox"><em></em></label>
-    <label>🎣 <span>Zones de pêche</span><input type="checkbox" checked><em></em></label>
-    <label>🌿 <span>Habitat</span><input type="checkbox" checked><em></em></label>
-    <label>🐟 <span>Espèces</span><input type="checkbox"><em></em></label>
-  </div>
-  <div class="bottom-cards">
-    <div class="info-card"><b>🌤️</b><span>Météo actuelle</span><strong id="temp">22°C</strong><small>Vent 15 nd</small></div>
-    <div class="info-card"><b>🌊</b><span>Hauteur des vagues</span><strong id="wave">1.2 m</strong><small>Période 6 s</small></div>
-    <div class="info-card"><b>💨</b><span>Vent</span><strong id="wind">15 nd</strong><small>NE (45°)</small></div>
-    <div class="info-card"><b>🐟</b><span>Meilleures zones de pêche</span><strong>Daurade · Loup · Sar</strong><small>Zones recommandées</small></div>
-    <div class="info-card"><b>★</b><span>Espèces recommandées</span><strong>12 espèces</strong><small>Selon conditions</small></div>
-  </div>
-</section>
+  <!-- ===== القائمة الجانبية ===== -->
+  <aside id="sidebar" class="hidden md:flex w-56 glass flex-col gap-1 p-2 text-sm" dir="ltr">
+    <a onclick="closePanels()" class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🗺️ <span data-i18n="carte">Carte</span></a>
+    <a class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🌤️ <span data-i18n="meteo">Météo & Mer</span></a>
+    <a class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🎣 <span data-i18n="peche">Pêche</span></a>
+    <a onclick="openSpecies()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🐠 <span data-i18n="especes">Espèces</span></a>
+    <a class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📍 <span data-i18n="zones">Zones</span></a>
+    <a onclick="document.getElementById('forecastPanel').classList.toggle('hidden')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📅 <span data-i18n="previsions">Prévisions</span></a>
+    <a onclick="openFavs()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">⭐ <span data-i18n="favoris">Favoris</span></a>
+    <a class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">⚙️ <span data-i18n="param">Paramètres</span></a>
+    <p id="slogan" class="mt-auto italic text-red-500 text-center text-xs p-3">Plus qu'une carte...<br><b>votre allié en mer</b></p>
+  </aside>
 
-<section class="content-view hidden" id="contentView">
-  <div class="content-head"><span class="pill">RED LINE FISHING</span><h1 id="contentTitle">Météo & Mer</h1><p id="contentText">Sélectionnez une rubrique dans le menu.</p></div>
-  <div class="content-grid" id="contentGrid"></div>
-</section>
-</main>
+  <!-- ===== الخريطة ===== -->
+  <main class="flex-1 relative">
+    <div id="map" class="w-full h-full"></div>
+
+    <!-- لوحة الطقس -->
+    <div class="absolute top-3 right-3 left-3 md:left-auto md:w-80 glass rounded-2xl p-3 z-[1000]">
+      <div class="flex justify-between text-center text-[10px] md:text-xs mb-3">
+        <button onclick="setLayer('vent')" id="btn-vent" class="layer-btn bg-red-600 rounded-lg px-2 md:px-3 py-2 font-bold">🌬️ Vent</button>
+        <button onclick="setLayer('vagues')" id="btn-vagues" class="layer-btn rounded-lg px-2 md:px-3 py-2">🌊 Vagues</button>
+        <button onclick="setLayer('courants')" id="btn-courants" class="layer-btn rounded-lg px-2 md:px-3 py-2">🧭 Courants</button>
+        <button onclick="setLayer('temp')" id="btn-temp" class="layer-btn rounded-lg px-2 md:px-3 py-2">🌡️ Temp.</button>
+      </div>
+      <p class="text-sm mb-1" id="windLabel">🌬️ Vitesse du vent</p>
+      <div class="h-2 rounded-full bg-gradient-to-r from-blue-500 via-yellow-400 to-red-600 mb-3"></div>
+      <div id="liveData" class="text-xs border-t border-white/10 pt-2"><p class="text-gray-400">⏳ Chargement...</p></div>
+    </div>
+
+    <!-- لوحة الطبقات -->
+    <div class="absolute top-60 right-3 w-64 md:w-80 glass rounded-2xl p-3 z-[1000] text-sm space-y-2">
+      <p class="font-bold" data-i18n="couches">Couches</p>
+      <div class="flex justify-between items-center"><span>🗿 <span data-i18n="fond">Fond marin</span></span><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+      <div class="flex justify-between items-center"><span>🎣 <span data-i18n="zonesP">Zones de pêche</span></span><div class="switch on" onclick="this.classList.toggle('on');toggleZones()"></div></div>
+      <div class="flex justify-between items-center"><span>🌊 <span data-i18n="waves">Vagues</span></span><div class="switch" onclick="this.classList.toggle('on');toggleWaves()"></div></div>
+      <div class="flex justify-between items-center"><span>🌿 <span data-i18n="habitat">Habitat</span></span><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+
+    <!-- لوحة التوقعات -->
+    <div id="forecastPanel" class="absolute bottom-3 right-3 left-3 md:left-auto md:w-[430px] glass rounded-2xl p-3 z-[1000] hidden">
+      <div class="flex justify-between items-center mb-2">
+        <p class="font-bold">📅 <span data-i18n="previsions">Prévisions 7 jours</span></p>
+        <button onclick="document.getElementById('forecastPanel').classList.add('hidden')" class="text-gray-400">✕</button>
+      </div>
+      <div id="forecastContent" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
+    </div>
+  </main>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="app.js"></script>
+<!-- ===== الشريط السفلي (كمبيوتر) ===== -->
+<footer class="glass hidden md:flex gap-3 px-4 py-2 z-20 text-sm">
+  <div class="glass flex-1 rounded-xl p-2 flex justify-between items-center"><span>⛅ <span data-i18n="meteoAct">Météo actuelle</span> <b id="tempVal" class="block text-lg">--°C</b></span><span>›</span></div>
+  <div class="glass flex-1 rounded-xl p-2 flex justify-between items-center"><span>🌊 <span data-i18n="vaguesF">Hauteur des vagues</span> <b id="waveVal" class="block text-lg">-- m</b></span><span>›</span></div>
+  <div class="glass flex-1 rounded-xl p-2 flex justify-between items-center"><span>🌬️ <span data-i18n="ventF">Vent</span> <b id="windVal" class="block text-lg">-- nd</b></span><span>›</span></div>
+  <div class="glass flex-1 rounded-xl p-2 flex justify-between items-center"><span>🎣 <span data-i18n="meilleures">Meilleures zones</span> <b class="block text-xs">Daurade • Loup • Sar</b></span><span>›</span></div>
+</footer>
+
+<!-- ===== شريط موبايل ===== -->
+<nav class="md:hidden glass fixed bottom-0 inset-x-0 z-[3000] flex justify-around py-2 text-xs">
+  <button onclick="closePanels()" class="flex flex-col items-center px-2">🗺️<span data-i18n="carte">Carte</span></button>
+  <button onclick="openSpecies()" class="flex flex-col items-center px-2">🐠<span data-i18n="especes">Espèces</span></button>
+  <button onclick="document.getElementById('forecastPanel').classList.toggle('hidden')" class="flex flex-col items-center px-2">📅<span data-i18n="previsions">Prév.</span></button>
+  <button onclick="openFavs()" class="flex flex-col items-center px-2">⭐<span data-i18n="favoris">Favoris</span></button>
+  <button onclick="openLogin()" class="flex flex-col items-center px-2">👤<span data-i18n="login">Compte</span></button>
+</nav>
+
+<!-- ===== نافذة الأنواع ===== -->
+<div id="speciesModal" class="fixed inset-0 bg-black/70 z-[3000] hidden items-center justify-center p-3" style="display:none">
+  <div class="glass rounded-2xl w-full max-w-[600px] max-h-[85vh] overflow-y-auto p-4">
+    <div class="flex justify-between items-center mb-3">
+      <p class="font-bold text-lg">🐠 <span id="speciesTitle">Espèces marines</span></p>
+      <button onclick="closeModal('speciesModal')" class="text-gray-400 hover:text-red-500 text-xl">✕</button>
+    </div>
+    <input id="speciesSearch" oninput="renderSpecies(this.value)" type="text" placeholder="🔍 Filtrer..."
+      class="w-full bg-slate-800/80 rounded-full px-4 py-2 text-sm outline-none mb-3">
+    <div id="speciesList" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+  </div>
+</div>
+
+<!-- ===== نافذة المفضلة ===== -->
+<div id="favModal" class="fixed inset-0 bg-black/70 z-[3000] hidden items-center justify-center p-3" style="display:none">
+  <div class="glass rounded-2xl w-full max-w-sm p-4">
+    <div class="flex justify-between items-center mb-3">
+      <p class="font-bold text-lg">⭐ <span data-i18n="favTitle">Mes Favoris</span></p>
+      <button onclick="closeModal('favModal')" class="text-gray-400 hover:text-red-500 text-xl">✕</button>
+    </div>
+    <div id="favList" class="space-y-2 text-sm"></div>
+  </div>
+</div>
+
+<!-- ===== نافذة الدخول ===== -->
+<div id="loginModal" class="fixed inset-0 bg-black/70 z-[3000] hidden items-center justify-center p-3" style="display:none">
+  <div class="glass rounded-2xl w-full max-w-sm p-5 text-center">
+    <p class="text-4xl mb-2">🎣</p>
+    <p class="font-bold text-lg mb-3" data-i18n="loginT">Connexion</p>
+    <input id="userInput" type="text" placeholder="Nom d'utilisateur / اسم المستخدم"
+      class="w-full bg-slate-800/80 rounded-full px-4 py-2 text-sm outline-none mb-3 text-center">
+    <div class="flex gap-2 justify-center">
+      <button onclick="doLogin()" class="bg-red-600 rounded-full px-6 py-2 text-sm font-bold" data-i18n="enter">Entrer</button>
+      <button onclick="doLogout()" class="rounded-full px-4 py-2 text-sm border border-white/20" data-i18n="logout">Déconnexion</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let lang='fr',isDark=true,zoneMarkers=[],waveGroup=null,currentLat=36.8,currentLon=11.5;
+const esc=s=>s.replace(/'/g,"\\'");
+
+/* ===== الخريطة ===== */
+const map=L.map('map',{zoomControl:false}).setView([36.8,11.5],7);
+const satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri'}).addTo(map);
+const darkLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'CARTO'});
+L.control.scale({position:'bottomleft'}).addTo(map);
+
+/* ===== الأنواع السمكية ===== */
+const species=[
+ {fr:"Daurade Royale",ar:"الدنيس الملكي",icon:"🐟",season:"Sep → Déc",size:"35 cm",regions:["n","c","s"],desc:"أشهر سمك في تونس، يعيش قرب الصخور."},
+ {fr:"Loup de Mer",ar:"القاروص",icon:"🐠",season:"Oct → Mar",size:"30 cm",regions:["n","c"],desc:"يفضّل مصبات الأنهار والخلجان."},
+ {fr:"Sar Commune",ar:"السار (البيوض)",icon:"🐟",season:"Mai → Sep",size:"25 cm",regions:["c"],desc:"قوي المقاومة، يعيش فوق القيعان الرملية."},
+ {fr:"Mérou",ar:"الهامور",icon:"🐡",season:"Jun → Oct",size:"45 cm",regions:["s"],desc:"ضخم، يعيش في الكهوف والصخور العميقة."},
+ {fr:"Mulet",ar:"البوري",icon:"🐟",season:"Aoû → Nov",size:"30 cm",regions:["n","c","s"],desc:"يتجمع في أسراب قرب السطح ويقفز كثيراً."},
+ {fr:"Sardinne",ar:"السردين",icon:"🐟",season:"Nov → Avr",size:"15 cm",regions:["n","c","s"],desc:"يُصطاد بالشباك والخيط الصخّالي."},
+ {fr:"Pageot",ar:"البغروق",icon:"🐠",season:"Avr → Juin",size:"20 cm",regions:["c"],desc:"يعيش في الأعماق، يُصطاد بالpalangre."},
+ {fr:"Calamar",ar:"الكلمار",icon:"🦑",season:"Oct → Fév",size:"20 cm",regions:["s"],desc:"يُصطاد ليلاً باللمبة أو turlutte."}
+];
+const regNames={n:["Nord","الشمال"],c:["Centre","الوسط"],s:["Sud","الجنوب"]};
+
+/* ===== دبابيس الصيد مربوطة بالأنواع ===== */
+const fishIcon=L.divIcon({className:'',html:'<div class="fish-pin"><span>🐟</span></div>',iconSize:[34,34]});
+[[37.10,10.40,'n'],[36.60,11.10,'n'],[36.20,11.60,'c'],[35.70,11.30,'c'],[35.10,11.40,'c'],[34.50,11.20,'s']]
+.forEach(([la,ln,reg])=>{
+  const m=L.marker([la,ln],{icon:fishIcon}).addTo(map);
+  m.bindPopup(()=>{
+    const list=species.filter(s=>s.regions.includes(reg));
+    return `<b>🎣 ${lang==='ar'?regNames[reg][1]:regNames[reg][0]}</b><br>`+
+      list.map(s=>`s.icon{s.icon}s.icon{lang==='ar'?s.ar:s.fr} <span class="text-gray-400 text-xs">(${s.season})</span>`).join('<br>')+
+      `<br><button onclick="openSpecies()" class="mt-2 bg-red-600 rounded-full px-3 py-1 text-xs font-bold">${lang==='ar'?'التفاصيل':'Détails'}</button>`;
+  });
+  zoneMarkers.push(m);
+});
+function toggleZones(){zoneMarkers.forEach(m=>map.hasLayer(m)?map.removeLayer(m):map.addLayer(m))}
+
+/* ===== دوائر الأمواج الحقيقية ===== */
+const wavePts=[[37.3,9.9],[37.0,10.5],[36.7,11.0],[36.4,11.4],[36.0,11.5],[35.6,11.3],[35.2,11.2],[34.7,11.1],[34.1,11.0],[33.5,11.0]];
+async function toggleWaves(){
+  if(waveGroup&&map.hasLayer(waveGroup)){map.removeLayer(waveGroup);return}
+  try{
+    const r=await(await fetch(`https://api.open-meteo.com/v1/marine?latitude={wavePts.map(p=>p[0])}&longitude={wavePts.map(p=>p[1])}&current=wave_height`)).json();
+    const arr=Array.isArray(r)?r:[r];
+    waveGroup=L.layerGroup(arr.map((d,i)=>{
+      const h=d.current.wave_height??0;
+      const col=h<0.5?'#22c55e':h<1?'#eab308':h<1.5?'#f97316':'#dc2626';
+      return L.circleMarker(wavePts[i],{radius:16,color:col,fillColor:col,fillOpacity:.45,weight:1}).bindPopup(`🌊 ${h.toFixed(2)} m`);
+    })).addTo(map);
+  }catch(e){console.error(e)}
+}
+
+/* ===== الليلي/النهاري ===== */
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('light',!isDark);
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  map.removeLayer(isDark?darkLayer:satLayer);
+  (isDark?satLayer:darkLayer).addTo(map);
+}
+
+/* ===== الترجمة ===== */
+const i18n={
+ fr:{carte:"Carte",meteo:"Météo & Mer",peche:"Pêche",especes:"Espèces",zones:"Zones",previsions:"Prévisions 7 jours",favoris:"Favoris",param:"Paramètres",couches:"Couches",fond:"Fond marin",zonesP:"Zones de pêche",habitat:"Habitat",meteoAct:"Météo actuelle",vaguesF:"Hauteur des vagues",ventF:"Vent",meilleures:"Meilleures zones",windLabel:"🌬️ Vitesse du vent",search:"🔍 Rechercher un lieu...",slogan:"Plus qu'une carte...<br><b>votre allié en mer</b>",waves:"Vagues",favTitle:"Mes Favoris",login:"Compte",loginT:"Connexion",enter:"Entrer",logout:"Déconnexion",noFav:"Aucun favori — cliquez ⭐ sur un lieu"},
+ ar:{carte:"الخريطة",meteo:"الطقس والبحر",peche:"الصيد",especes:"الأنواع",zones:"المناطق",previsions:"توقعات 7 أيام",favoris:"المفضلة",param:"الإعدادات",couches:"الطبقات",fond:"قاع البحر",zonesP:"مناطق الصيد",habitat:"الموطن",meteoAct:"الطقس الحالي",vaguesF:"ارتفاع الأمواج",ventF:"الرياح",meilleures:"أفضل المناطق",windLabel:"🌬️ سرعة الرياح",search:"🔍 ابحث عن مكان...",slogan:"أكثر من خريطة...<br><b>رفيقك في البحر</b>",waves:"الأمواج",favTitle:"مفضلتي",login:"حسابي",loginT:"تسجيل الدخول",enter:"دخول",logout:"خروج",noFav:"لا مفضلة بعد — اضغط ⭐ على أي مكان"}
+};
+function toggleLang(){
+  lang=lang==='fr'?'ar':'fr';
+  document.getElementById('langBtn').textContent=lang==='fr'?'🌐 FR':'🌐 AR';
+  document.documentElement.lang=lang;
+  document.getElementById('sidebar').setAttribute('dir',lang==='ar'?'rtl':'ltr');
+  document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=i18n[lang][el.dataset.i18n]);
+  document.getElementById('windLabel').textContent=i18n[lang].windLabel;
+  document.getElementById('searchInput').placeholder=i18n[lang].search;
+  document.getElementById('speciesSearch').placeholder=lang==='ar'?'🔍 ابحث...':'🔍 Filtrer...';
+  document.getElementById('slogan').innerHTML=i18n[lang].slogan;
+  fetchWeather();renderSpecies(document.getElementById('speciesSearch').value);renderFavs();
+}
+
+/* ===== الطقس + التوقعات ===== */
+async function fetchWeather(){
+  try{
+    const r=(await fetch(`https://api.open-meteo.com/v1/forecast?latitude={currentLat}&longitude={currentLon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&daily=wave_height_max,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code&timezone=auto`)).json();
+    const c=r.current,nd=(c.wind_speed_10m/1.852).toFixed(1);
+    document.getElementById('liveData').innerHTML=`<p>🌬️ ndnd<spanstyle="display:inline−block;transform:rotate({nd} nd <span style="display:inline-block;transform:rotate(ndnd<spanstyle="display:inline−block;transform:rotate({c.wind_direction_10m}deg)">➤</span> • 🌡️ ${c.temperature_2m}°C</p>`;
+    document.getElementById('tempVal').textContent=c.temperature_2m+'°C';
+    document.getElementById('windVal').textContent=nd+' nd';
+    document.getElementById('waveVal').textContent=(r.daily.wave_height_max[0]??'--')+' m';
+    const days=lang==='ar'?['أحد','إثن','ثلا','أرب','خمي','جمع','سبت']:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+    let html='';
+    for(let i=0;i<7;i++){
+      const d=new Date(r.daily.time[i]);
+      html+=`<div class="glass rounded-lg p-1.5"><p class="text-gray-400">days[d.getDay()]</p><pclass="text−lg">{days[d.getDay()]}</p><p class="text-lg">days[d.getDay()]</p><pclass="text−lg">{weatherIcon(r.daily.weather_code[i])}</p><p class="font-bold">r.daily.temperature2mmax[i]°</p><pclass="text−gray−400">{r.daily.temperature_2m_max[i]}°</p><p class="text-gray-400">r.daily.temperature2​mm​ax[i]°</p><pclass="text−gray−400">{r.daily.temperature_2m_min[i]}°</p><p class="text-[10px] text-blue-300">🌬️(r.daily.windspeed10mmax[i]/1.852).toFixed(0)nd</p><pclass="text−[10px]text−cyan−300">🌊{(r.daily.wind_speed_10m_max[i]/1.852).toFixed(0)}nd</p><p class="text-[10px] text-cyan-300">🌊(r.daily.winds​peed1​0mm​ax[i]/1.852).toFixed(0)nd</p><pclass="text−[10px]text−cyan−300">🌊{r.daily.wave_height_max[i]??'--'}m</p></div>`;
+    }
+    document.getElementById('forecastContent').innerHTML=html;
+  }catch(e){document.getElementById('liveData').innerHTML='<p class="text-red-400">⚠️ Erreur connexion</p>'}
+}
+function weatherIcon(code){
+  if(code===0)return'☀️';if(code<=3)return'⛅';if(code<=48)return'🌫️';
+  if(code<=67)return'🌧️';if(code<=77)return'🌨️';if(code<=82)return'🌦️';return'⛈️';
+}
+fetchWeather();setInterval(fetchWeather,600000);
+
+/* ===== البحث ===== */
+let sTimeout;
+function searchPlace(q){
+  clearTimeout(sTimeout);
+  const box=document.getElementById('searchResults');
+  if(q.length<3)return box.classList.add('hidden');
+  sTimeout=setTimeout(async()=>{
+    const res=await(await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q+', Tunisia')}&limit=6`)).json();
+    if(!res.length)return box.classList.add('hidden');
+    box.innerHTML=res.map(r=>`<div onclick="goTo(r.lat,{r.lat},r.lat,{r.lon},'esc(r.displayname)′)"class="px−3py−2hover:bg−red−600/30cursor−pointertext−smborder−bborder−white/5">📍{esc(r.display_name)}')" class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">📍esc(r.displayn​ame)′)"class="px−3py−2hover:bg−red−600/30cursor−pointertext−smborder−bborder−white/5">📍{r.display_name}</div>`).join('');
+    box.classList.remove('hidden');
+  },400);
+}
+function goTo(lat,lon,name){
+  map.setView([lat,lon],11);
+  const fav=lang==='ar'?'أضف للمفضلة':'Ajouter aux favoris';
+  L.popup().setLatLng([lat,lon]).setContent(`<b>name</b><br><buttononclick="addFav({name}</b><br><button onclick="addFav(name</b><br><buttononclick="addFav({lat},lon,′{lon},'lon,′{esc(name)}')" class="mt-1 bg-red-600 rounded-full px-3 py-1 text-xs font-bold">⭐ ${fav}</button>`).openOn(map);
+  currentLat=lat;currentLon=lon;fetchWeather();
+  document.getElementById('searchResults').classList.add('hidden');
+  document.getElementById('searchInput').value='';
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.relative'))document.getElementById('searchResults').classList.add('hidden')});
+
+/* ===== المفضلة ===== */
+let favs=JSON.parse(localStorage.getItem('rlf_favs')||'[]');
+function addFav(lat,lon,name){
+  if(favs.some(f=>f.name===name))return;
+  favs.push({lat,lon,name});
+  localStorage.setItem('rlf_favs',JSON.stringify(favs));
+  renderFavs();
+}
+function delFav(i){favs.splice(i,1);localStorage.setItem('rlf_favs',JSON.stringify(favs));renderFavs()}
+function renderFavs(){
+  const box=document.getElementById('favList');
+  box.innerHTML=favs.length?favs.map((f,i)=>`<div class="flex justify-between items-center glass rounded-xl p-2"><span class="cursor-pointer hover:text-red-400" onclick="goTo(f.lat,{f.lat},f.lat,{f.lon},'esc(f.name)′);closeModal(′favModal′)">📍{esc(f.name)}');closeModal('favModal')">📍esc(f.name)′);closeModal(′favModal′)">📍{f.name}</span><button onclick="delFav(i)"class="text−red−500">🗑®</button></div>‘).join(′′):‘<pclass="text−gray−400text−xs">{i})" class="text-red-500">🗑️</button></div>`).join(''):`<p class="text-gray-400 text-xs">i)"class="text−red−500">🗑R◯</button></div>‘).join(′′):‘<pclass="text−gray−400text−xs">{i18n[lang].noFav}</p>`;
+}
+function openFavs(){renderFavs();openModal('favModal')}
+
+/* ===== تسجيل الدخول ===== */
+function openLogin(){updateLoginUI();openModal('loginModal')}
+function updateLoginUI(){
+  const u=localStorage.getItem('rlf_user');
+  document.getElementById('loginBtn').textContent=u?'🟢':'👤';
+  document.getElementById('userInput').value=u||'';
+}
+function doLogin(){
+  const u=document.getElementById('userInput').value.trim();
+  if(u){localStorage.setItem('rlf_user',u);closeModal('loginModal');updateLoginUI()}
+}
+function doLogout(){localStorage.removeItem('rlf_user');closeModal('loginModal');updateLoginUI()}
+
+/* ===== الأنواع ===== */
+function renderSpecies(filter=''){
+  const L2=lang==='ar'?'ar':'fr';
+  document.getElementById('speciesList').innerHTML=species
+    .filter(s=>(s.fr+s.ar).toLowerCase().includes(filter.toLowerCase()))
+    .map(s=>`<div class="glass rounded-xl p-3 text-sm"><div class="flex items-center gap-2 mb-1"><span class="text-3xl">s.icon</span><b>{s.icon}</span><b>s.icon</span><b>{L2==='ar'?s.ar:s.fr}</b></div><p class="text-xs text-gray-400">📍 s.regions.map(r=>lang===′ar′?regNames[r][1]:regNames[r][0]).join(′•′)</p><pclass="text−xstext−blue−300">📅{s.regions.map(r=>lang==='ar'?regNames[r][1]:regNames[r][0]).join(' • ')}</p><p class="text-xs text-blue-300">📅s.regions.map(r=>lang===′ar′?regNames[r][1]:regNames[r][0]).join(′•′)</p><pclass="text−xstext−blue−300">📅{s.season}</p><p class="text-xs text-yellow-300">📏 s.size</p><pclass="text−xsmt−1text−gray−300">{s.size}</p><p class="text-xs mt-1 text-gray-300">s.size</p><pclass="text−xsmt−1text−gray−300">{s.desc}</p></div>`).join('');
+}
+function openSpecies(){
+  renderSpecies(document.getElementById('speciesSearch').value);
+  document.getElementById('speciesTitle').textContent=lang==='ar'?'الأنواع البحرية':'Espèces marines';
+  openModal('speciesModal');
+}
+
+/* ===== النوافذ ===== */
+function openModal(id){
+  const m=document.getElementById(id);
+  m.classList.remove('hidden');m.style.display='flex';
+}
+function closeModal(id){
+  const m=document.getElementById(id);
+  m.classList.add('hidden');m.style.display='none';
+}
+function closePanels(){document.getElementById('forecastPanel').classList.add('hidden')}
+
+/* ===== تبديل طبقات الطقس ===== */
+function setLayer(mode){
+  document.querySelectorAll('.layer-btn').forEach(b=>b.classList.remove('bg-red-600','font-bold'));
+  document.getElementById('btn-'+mode).classList.add('bg-red-600','font-bold');
+}
+
+updateLoginUI();renderFavs();
+</script>
 </body>
 </html>
