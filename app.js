@@ -344,12 +344,13 @@ async function loadRealData(view) {
       let status = "Conditions moyennes";
 
       if (wind <= 15 && wave <= 1.2) {
-        status = "🎣 Bonnes conditions";
-      }
+     if (wind <= 15 && wave <= 1.2) {
+  status = "🎣 Bonnes conditions";
+}
 
-      if (wind > 25 || wave > 2) {
-        status = "⚠️ Conditions difficiles";
-      }
+if (wind > 25 || wave > 2) {
+  status = "⚠️ Conditions difficiles";
+}
 
       contentGrid.innerHTML =
 
