@@ -342,16 +342,15 @@ async function loadRealData(view) {
       contentText.textContent =
        "Conditions de pêche réelles pour " + place + ".";
       let status = "Conditions moyennes";
+let status = "🟡 Conditions moyennes";
 
-      if (wind <= 15 && wave <= 1.2) {
-     if (wind <= 15 && wave <= 1.2) {
-  status = "🎣 Bonnes conditions";
+if (wind <= 15 && wave <= 1.2) {
+  status = "🟢 Bonnes conditions";
 }
 
 if (wind > 25 || wave > 2) {
-  status = "⚠️ Conditions difficiles";
+  status = "🔴 Conditions difficiles";
 }
-
       contentGrid.innerHTML =
 
         "<div class='info-card'>" +
