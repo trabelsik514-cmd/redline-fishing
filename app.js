@@ -422,14 +422,14 @@ if (wind > 25 || wave > 2) {
       contentText.textContent =
         "Analyse des conditions autour de " + place;
 
-      let recommendation = "Zone normale";
+     let recommendation = "🟡 Zone moyenne";
 
       if (wind <= 15 && wave <= 1.2) {
-        recommendation = "⭐ Zone favorable";
+       recommendation = "🟢 Zone favorable";
       }
 
       if (wind > 25 || wave > 2) {
-        recommendation = "⚠️ Zone déconseillée";
+      recommendation = "🔴 Zone déconseillée";
       }
 
       contentGrid.innerHTML =
