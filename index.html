@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Red Line Fishing</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -236,7 +237,7 @@ function toggleLang(){
 /* ===== الطقس + التوقعات ===== */
 async function fetchWeather(){
   try{
-    const r=(await fetch(`https://api.open-meteo.com/v1/forecast?latitude={currentLat}&longitude={currentLon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&daily=wave_height_max,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code&timezone=auto`)).json();
+    const r=await(await fetch(`https://api.open-meteo.com/v1/forecast?latitude={currentLat}&longitude={currentLon}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code&daily=wave_height_max,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code&timezone=auto`)).json();
     const c=r.current,nd=(c.wind_speed_10m/1.852).toFixed(1);
     document.getElementById('liveData').innerHTML=`<p>🌬️ ndnd<spanstyle="display:inline−block;transform:rotate({nd} nd <span style="display:inline-block;transform:rotate(ndnd<spanstyle="display:inline−block;transform:rotate({c.wind_direction_10m}deg)">➤</span> • 🌡️ ${c.temperature_2m}°C</p>`;
     document.getElementById('tempVal').textContent=c.temperature_2m+'°C';
@@ -257,16 +258,34 @@ function weatherIcon(code){
 }
 fetchWeather();setInterval(fetchWeather,600000);
 
-/* ===== البحث ===== */
+/* ===== البحث المُصلح (Nominatim + Photon بديل) ===== */
 let sTimeout;
 function searchPlace(q){
   clearTimeout(sTimeout);
   const box=document.getElementById('searchResults');
   if(q.length<3)return box.classList.add('hidden');
   sTimeout=setTimeout(async()=>{
-    const res=await(await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q+', Tunisia')}&limit=6`)).json();
-    if(!res.length)return box.classList.add('hidden');
-    box.innerHTML=res.map(r=>`<div onclick="goTo(r.lat,{r.lat},r.lat,{r.lon},'esc(r.displayname)′)"class="px−3py−2hover:bg−red−600/30cursor−pointertext−smborder−bborder−white/5">📍{esc(r.display_name)}')" class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">📍esc(r.displayn​ame)′)"class="px−3py−2hover:bg−red−600/30cursor−pointertext−smborder−bborder−white/5">📍{r.display_name}</div>`).join('');
+    let results=[];
+    try{
+      const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q+' Tunisia')}&limit=6&accept-language=ar`);
+      results=await r.json();
+    }catch(e){console.warn('Nominatim failed, trying Photon')}
+    if(!results.length){
+      try{
+        const r=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&bbox=7.5,30,12.5,38&limit=6`);
+        const d=await r.json();
+        results=(d.features||[]).map(f=>({
+          lat:f.geometry.coordinates[1],
+          lon:f.geometry.coordinates[0],
+          display_name:(f.properties.name||'')+' — '+(f.properties.city||f.properties.state||'Tunisie')
+        }));
+      }catch(e){console.error('Photon failed too')}
+    }
+    if(!results.length){
+      box.innerHTML='<div class="px-3 py-2 text-xs text-gray-400">❌ لا نتائج / Aucun résultat</div>';
+      box.classList.remove('hidden');return;
+    }
+    box.innerHTML=results.map(r=>`<div onclick="goTo(r.lat,{r.lat},r.lat,{r.lon},'esc(r.displayname)′)"class="px−3py−2hover:bg−red−600/30cursor−pointertext−smborder−bborder−white/5">📍{esc(r.display_name)}')" class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">📍esc(r.displayn​ame)′)"class="px−3py−2hover:bg−red−600/30cursor−pointertext−smborder−bborder−white/5">📍{r.display_name}</div>`).join('');
     box.classList.remove('hidden');
   },400);
 }
@@ -313,7 +332,7 @@ function renderSpecies(filter=''){
   const L2=lang==='ar'?'ar':'fr';
   document.getElementById('speciesList').innerHTML=species
     .filter(s=>(s.fr+s.ar).toLowerCase().includes(filter.toLowerCase()))
-    .map(s=>`<div class="glass rounded-xl p-3 text-sm"><div class="flex items-center gap-2 mb-1"><span class="text-3xl">s.icon</span><b>{s.icon}</span><b>s.icon</span><b>{L2==='ar'?s.ar:s.fr}</b></div><p class="text-xs text-gray-400">📍 s.regions.map(r=>lang===′ar′?regNames[r][1]:regNames[r][0]).join(′•′)</p><pclass="text−xstext−blue−300">📅{s.regions.map(r=>lang==='ar'?regNames[r][1]:regNames[r][0]).join(' • ')}</p><p class="text-xs text-blue-300">📅s.regions.map(r=>lang===′ar′?regNames[r][1]:regNames[r][0]).join(′•′)</p><pclass="text−xstext−blue−300">📅{s.season}</p><p class="text-xs text-yellow-300">📏 s.size</p><pclass="text−xsmt−1text−gray−300">{s.size}</p><p class="text-xs mt-1 text-gray-300">s.size</p><pclass="text−xsmt−1text−gray−300">{s.desc}</p></div>`).join('');
+    .map(s=>`<div class="glass rounded-xl p-3 text-sm"><div class="flex items-center gap-2 mb-1"><span class="text-3xl">s.icon</span><b>{s.icon}</span><b>s.icon</span><b>{L2==='ar'?s.ar:s.fr}</b></div><p class="text-xs text-gray-400">📍 s.regions.map(r=>lang===′arregNames[r][1]:regNames[r][0]).join(′•′)</p><pclass="text−xstext−blue−300">📅{s.regions.map(r=>lang==='arregNames[r][1]:regNames[r][0]).join(' • ')}</p><p class="text-xs text-blue-300">📅s.regions.map(r=>lang===′arregNames[r][1]:regNames[r][0]).join(′•′)</p><pclass="text−xstext−blue−300">📅{s.season}</p><p class="text-xs text-yellow-300">📏 s.size</p><pclass="text−xsmt−1text−gray−300">{s.size}</p><p class="text-xs mt-1 text-gray-300">s.size</p><pclass="text−xsmt−1text−gray−300">{s.desc}</p></div>`).join('');
 }
 function openSpecies(){
   renderSpecies(document.getElementById('speciesSearch').value);
@@ -332,7 +351,7 @@ function closeModal(id){
 }
 function closePanels(){document.getElementById('forecastPanel').classList.add('hidden')}
 
-/* ===== تبديل طبقات الطقس ===== */
+/* ===== طبقات الطقس ===== */
 function setLayer(mode){
   document.querySelectorAll('.layer-btn').forEach(b=>b.classList.remove('bg-red-600','font-bold'));
   document.getElementById('btn-'+mode).classList.add('bg-red-600','font-bold');
