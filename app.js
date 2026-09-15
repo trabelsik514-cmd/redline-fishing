@@ -483,15 +483,17 @@ if (wind > 25 || wave > 2) {
       let html = "";
 
       for (let i = 0; i < Math.min(6, times.length); i++) {
+for (let i = 0; i < Math.min(6, times.length); i++) {
 
-        html +=
-          "<div class='info-card'>" +
-          "<b>🕐</b>" +
-          "<span>" + times[i] + "</span>" +
-          "<strong>" + temps[i] + " °C</strong>" +
-          "<small>💨 " + winds[i] +
-          " km/h · 🌊 " + waves[i] + " m</small>" +
-          "</div>";
+  html +=
+    "<div class='info-card'>" +
+    "<b>🕐</b>" +
+    "<span>" + times[i] + "</span>" +
+    "<strong>🌡️ " + temps[i] + " °C</strong>" +
+    "<small>💨 " + winds[i] +
+    " km/h · 🌊 " + waves[i] + " m</small>" +
+    "</div>";
+}
 
       }
 
