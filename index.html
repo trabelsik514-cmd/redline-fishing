@@ -72,7 +72,7 @@ body.light .hourCell{background:rgba(0,0,0,.05)}
     <a onclick="togglePanel('weatherPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🌤️ <span data-i18n="meteo">Météo</span></a>
     <a onclick="openSpecies()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🐠 <span data-i18n="especes">Espèces</span></a>
     <a onclick="togglePanel('layersPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📍 <span data-i18n="zones">Zones</span></a>
-    <a onclick="togglePanel('forecastPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📅  data-i18n="previsions">Prévisions</span></a>
+    <a onclick="togglePanel('forecastPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📅 <span data-i18n="previsions">Prévisions</span></a>
     <a onclick="openFavs()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">⭐ <span data-i18n="favoris">Favoris</span></a>
     <a onclick="myLocation()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📡 <span data-i18n="gps">GPS</span></a>
     <p id="userSlot" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer mt-auto">👤 <span>...</span></p>
@@ -206,7 +206,7 @@ var species=[
 {fr:"Loup de Mer",ar:"القاروص",icon:"🐠",season:"Oct → Mar",size:"30 cm",regions:"n,c",desc:"يفضّل مصبات الأنهار والخلجان."},
 {fr:"Sar Commune",ar:"السار",icon:"🐟",season:"Mai → Sep",size:"25 cm",regions:"c",desc:"قوي المقاومة، يعيش فوق الرمال."},
 {fr:"Mérou",ar:"الهامور",icon:"🐡",season:"Jun → Oct",size:"45 cm",regions:"s",desc:"ضخم، يعيش في الكهوف والصخور."},
-{fr:"Mulet",arالبوري",icon:"🐟",season:"Aoû → Nov",size:"30 cm",regions:"n,c,s",desc:"يتجمع في أسراب قرب السطح."},
+{fr:"Mulet",ar:"البوري",icon:"🐟",season:"Aoû → Nov",size:"30 cm",regions:"n,c,s",desc:"يتجمع في أسراب قرب السطح."},
 {fr:"Sardinne",ar:"السردين",icon:"🐟",season:"Nov → Avr",size:"15 cm",regions:"n,c,s",desc:"يُصطاد بالشباك."},
 {fr:"Pageot",ar:"البغروق",icon:"🐠",season:"Avr → Juin",size:"20 cm",regions:"c",desc:"يعيش في الأعماق."},
 {fr:"Calamar",ar:"الكلمار",icon:"🦑",season:"Oct → Fév",size:"20 cm",regions:"s",desc:"يُصطاد ليلاً باللمبة."}];
@@ -272,7 +272,7 @@ function fetchWeather(){
 var url='https://api.open-meteo.com/v1/forecast?latitude='+currentLat+'&longitude='+currentLon+'&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&daily=wave_height_max,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code&timezone=auto';
 fetch(url).then(function(r){return r.json()}).then(function(d){
 var c=d.current,nd=(c.wind_speed_10m/1.852).toFixed(1);
-document.getElementById('liveData').innerHTML='>🌬️ '+nd+' nd • 🌡️ '+c.temperature_2m+'°C • 💨 '+((c.wind_gusts_10m||0)/1.852).toFixed(0)+' nd</p>';
+document.getElementById('liveData').innerHTML='<p>🌬️ '+nd+' nd • 🌡️ '+c.temperature_2m+'°C • 💨 '+((c.wind_gusts_10m||0)/1.852).toFixed(0)+' nd</p>';
 document.getElementById('tempVal').textContent=c.temperature_2m+'°C';
 document.getElementById('windVal').textContent=nd+' nd';
 document.getElementById('waveVal').textContent=(d.daily.wave_height_max[0]||'--')+' m';
@@ -282,7 +282,7 @@ var ci=document.getElementById('compassInfo');
 if(ci){ci.innerHTML='<p class="font-bold text-sm">'+windDirName(c.wind_direction_10m)+' • '+nd+' nd</p><p class="text-gray-400">💨 الهبّات: '+((c.wind_gusts_10m||0)/1.852).toFixed(0)+' nd</p><p>'+(nd<15?'✅ ظروف آمنة للصيد':'⚠️ رياح قوية — احذر!')+'</p>'}
 var days=(lang==='ar')?['أحد','إثن','ثلا','أرب','خمي','جمع','سبت']:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],html='';
 for(var i=0;i<7;i++){var day=new Date(d.daily.time[i]);
-html+='<div class="glass rounded-lg p-1.5"><p class="text-gray-400">'+days[day.getDay()]+'</p><p class="text-lg">'+weatherIcon(d.daily.weather_code[i])+'</p><p class="font-bold">'+d.daily.temperature_2m_max[i°</p><p class="text-gray-400">'+d.daily.temperature_2m_min[i]+'°</p><p class="text-[10px] text-blue-300">🌬️'+(d.daily.wind_speed_10m_max[i]/1.852).toFixed(0)+'nd</p><p class="text-[10px] text-cyan-300">🌊'+(d.daily.wave_height_max[i]||'--')+'m</p></div>'}
+html+='<div class="glass rounded-lg p-1.5"><p class="text-gray-400">'+days[day.getDay()]+'</p><p class="text-lg">'+weatherIcon(d.daily.weather_code[i])+'</p><p class="font-bold">'+d.daily.temperature_2m_max[i]+'°</p><p class="text-gray-400">'+d.daily.temperature_2m_min[i]+'°</p><p class="text-[10px] text-blue-300">🌬️'+(d.daily.wind_speed_10m_max[i]/1.852).toFixed(0)+'nd</p><p class="text-[10px] text-cyan-300">🌊'+(d.daily.wave_height_max[i]||'--')+'m</p></div>'}
 document.getElementById('forecastContent').innerHTML=html;
 fetchHourly();
 }).catch(function(){document.getElementById('liveData').innerHTML='<p class="text-red-400">⚠️ Erreur connexion</p>'})}
