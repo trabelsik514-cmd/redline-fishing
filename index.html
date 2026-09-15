@@ -194,12 +194,73 @@ document.getElementById('authScreen').style.display='flex';
 document.getElementById('logoutBtn').classList.add('hidden')}});
 
 var map=L.map('map',{zoomControl:false}).setView([36.8,11.5],7);
-var satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri'}).addTo(map);
-var darkLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'CARTO'});
-var oceanLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri Ocean'});
-L.control.scale({position:'bottomleft'}).addTo(map);
 
-function toggleOcean(){if(map.hasLayer(oceanLayer))map.removeLayer(oceanLayer);else map.addLayer(oceanLayer)}
+/* 🧭 الخريطة البحرية الرئيسية */
+var marineLayer=L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+  maxZoom:19,
+  attribution:'© OpenStreetMap'
+}).addTo(map);
+
+/* 🛰️ الأقمار الصناعية */
+var satLayer=L.tileLayer(
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+{attribution:'Esri'}
+);
+
+/* 🌑 الوضع الداكن */
+var darkLayer=L.tileLayer(
+'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+{attribution:'CARTO'}
+);
+
+/* 🌊 طبقة المحيط */
+var oceanLayer=L.tileLayer(
+'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
+{attribution:'Esri Ocean'}
+);
+
+L.control.scale({
+  position:'bottomleft',
+  imperial:false
+}).addTo(map);
+
+
+/* 🌊 تشغيل / إيقاف طبقة قاع البحر */
+function toggleOcean(){
+  if(map.hasLayer(oceanLayer)){
+    map.removeLayer(oceanLayer);
+  }else{
+    map.addLayer(oceanLayer);
+  }
+}
+
+
+/* 🎨 زر سريع لتغيير شكل الخريطة */
+function setMapStyle(style){
+
+  if(map.hasLayer(marineLayer))map.removeLayer(marineLayer);
+  if(map.hasLayer(satLayer))map.removeLayer(satLayer);
+  if(map.hasLayer(darkLayer))map.removeLayer(darkLayer);
+  if(map.hasLayer(oceanLayer))map.removeLayer(oceanLayer);
+
+  if(style==='marine'){
+    marineLayer.addTo(map);
+  }
+
+  if(style==='satellite'){
+    satLayer.addTo(map);
+  }
+
+  if(style==='dark'){
+    darkLayer.addTo(map);
+  }
+
+  if(style==='ocean'){
+    oceanLayer.addTo(map);
+  }
+}
 
 var species=[
 {fr:"Daurade Royale",ar:"الدنيس الملكي",icon:"🐟",season:"Sep → Déc",size:"35 cm",regions:"n,c,s",desc:"أشهر سمك في تونس، يعيش قرب الصخور."},
