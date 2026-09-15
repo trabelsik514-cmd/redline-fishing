@@ -380,37 +380,105 @@ if (wind > 25 || wave > 2) {
     // ESPECES
     // =========================
 
-    else if (view === "species") {
+   else if (view === "species") {
 
-      contentTitle.textContent = "Espèces";
+  contentTitle.textContent = "Espèces";
 
-      contentText.textContent =
-        "Recommandations selon les conditions actuelles.";
+  contentText.textContent =
+    "Espèces observées près de " + place;
 
-      let species = "Daurade · Sar · Loup";
+  contentGrid.innerHTML =
+    "<div class='info-card'>" +
+    "<b>🐟</b>" +
+    "<span>Recherche des espèces...</span>" +
+    "<strong>Chargement des données réelles</strong>" +
+    "</div>";
 
-      if (wave > 1.5) {
-        species = "Loup · Sar · Mérou";
-      }
+  try {
 
-      contentGrid.innerHTML =
+    const gbifUrl =
+      "https://api.gbif.org/v1/occurrence/search" +
+      "?decimalLatitude=" + lat +
+      "," + lat +
+      "&decimalLongitude=" + lon +
+      "," + lon +
+      "&limit=20" +
+      "&hasCoordinate=true" +
+      "&kingdomKey=1";
 
-        "<div class='info-card'>" +
-        "<b>🐟</b>" +
-        "<span>Espèces recommandées</span>" +
-        "<strong>" + species + "</strong>" +
-        "<small>Selon les conditions marines</small>" +
-        "</div>" +
+    const response = await fetch(gbifUrl);
 
-        "<div class='info-card'>" +
-        "<b>🌊</b>" +
-        "<span>État de la mer</span>" +
-        "<strong>" + wave + " m</strong>" +
-        "<small>Hauteur des vagues</small>" +
-        "</div>";
-
+    if (!response.ok) {
+      throw new Error("GBIF request failed");
     }
 
+    const data = await response.json();
+
+    const speciesMap = new Map();
+
+    (data.results || []).forEach(record => {
+
+      if (
+        record.species &&
+        record.species.trim() !== ""
+      ) {
+
+        speciesMap.set(
+          record.species,
+          record.speciesKey
+        );
+
+      }
+
+    });
+
+    const speciesList =
+      Array.from(speciesMap.keys()).slice(0, 8);
+
+    if (speciesList.length === 0) {
+
+      contentGrid.innerHTML =
+        "<div class='info-card'>" +
+        "<b>🔎</b>" +
+        "<span>Aucune espèce trouvée</span>" +
+        "<small>Aucun enregistrement GBIF disponible pour ce point.</small>" +
+        "</div>";
+
+    } else {
+
+      let html = "";
+
+      speciesList.forEach(species => {
+
+        html +=
+          "<div class='info-card'>" +
+          "<b>🐟</b>" +
+          "<span>Espèce observée</span>" +
+          "<strong>" + species + "</strong>" +
+          "<small>Donnée provenant de GBIF</small>" +
+          "</div>";
+
+      });
+
+      contentGrid.innerHTML = html;
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Erreur GBIF :",
+      error
+    );
+
+    contentGrid.innerHTML =
+      "<div class='info-card'>" +
+      "<b>⚠️</b>" +
+      "<span>Erreur</span>" +
+      "<strong>Données indisponibles</strong>" +
+      "<small>Impossible de récupérer les espèces pour cette zone.</small>" +
+      "</div>";
+  }
+}
     // =========================
     // ZONES
     // =========================
