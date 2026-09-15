@@ -100,6 +100,8 @@ body.light{background:#e2e8f0;color:#0f172a}
       <div class="flex justify-between items-center"><span>🗿 <span data-i18n="fond">Fond marin</span></span><div class="switch" onclick="this.classList.toggle('on');toggleOcean()"></div></div>
 
       <div class="flex justify-between items-center"><span>🎣 <span data-i18n="zonesP">Zones de pêche</span></span><div class="switch on" onclick="this.classList.toggle('on');toggleZones()"></div></div>
+function toggleOcean(){if(map.hasLayer(oceanLayer))map.removeLayer(oceanLayer);else map.addLayer(oceanLayer)}
+
       <div class="flex justify-between items-center"><span>🌊 <span data-i18n="waves">Vagues</span></span><div class="switch" onclick="this.classList.toggle('on');toggleWaves()"></div></div>
       <div class="flex justify-between items-center"><span>🌿 <span data-i18n="habitat">Habitat</span></span><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
     </div>
