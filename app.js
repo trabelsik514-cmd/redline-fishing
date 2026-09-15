@@ -138,15 +138,16 @@ document.addEventListener("DOMContentLoaded", () => {
           alert("Lieu introuvable : " + query);
           return;
         }
-        selectedLocation = {
-        lat: lat,
-        lon: lon,
-        name: result.address || query
-        };
         const result = data.candidates[0];
 
-        const lat = result.location.y;
-        const lon = result.location.x;
+const lat = result.location.y;
+const lon = result.location.x;
+
+selectedLocation = {
+  lat: lat,
+  lon: lon,
+  name: result.address || query
+};
 
         // Move map to result
         if (map) {
