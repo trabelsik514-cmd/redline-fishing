@@ -121,6 +121,38 @@ document.getElementById("search").addEventListener("input",function(){
  },500);
 });
 })();
+// 🖱️ الضغط على الخريطة = حالة الطقس
+let clickMarker=null;
+function dirName(deg){return["N","NE","E","SE","S","SO","O","NO"][Math.round(deg/45)%8]}
+map.on("click",async e=>{
+ const la=e.latlng.lat,lo=e.latlng.lng;
+ if(clickMarker)map.removeLayer(clickMarker);
+ clickMarker=L.marker([la,lo]).addTo(map);
+ clickMarker.bindPopup("<div class='card'><div class='head'><strong>⏳ جاري التحميل...</strong><small>Red Line Fishing</small></div></div>",{className:"redline-popup",maxWidth:300}).openPopup();
+ try{
+  const u="https://api.open-meteo.com/v1/forecast?latitude="+la+"&longitude="+lo+
+   "&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m"+
+   "&daily=wave_height_max,temperature_2m_max,temperature_2m_min&timezone=auto";
+  const d=await (await fetch(u)).json(),c=d.current;
+  const nd=(Number(c.wind_speed_10m)/1.852).toFixed(1);
+  const g=(Number(c.wind_gusts_10m)/1.852).toFixed(1);
+  const wh=(d.daily.wave_height_max&&d.daily.wave_height_max[0]!=null)?Number(d.daily.wave_height_max[0]).toFixed(2)+" m":"--";
+  const safe=Number(nd)<15;
+  const name="📍 "+la.toFixed(3)+", "+lo.toFixed(3);
+  clickMarker.bindPopup("<div class='card'><div class='head'><strong>"+name+"</strong><small>Red Line Fishing</small></div><div class='body'>"+
+   "<div class='item'><span>🌡️ الحرارة</span><span>"+c.temperature_2m+"°C</span></div>"+
+   "<div class='item'><span>🌬️ الرياح</span><span>"+nd+" nd</span></div>"+
+   "<div class='item'><span>🧭 الاتجاه</span><span>"+dirName(c.wind_direction_10m)+" ("+Math.round(c.wind_direction_10m)+"°)</span></div>"+
+   "<div class='item'><span>💨 الهبّات</span><span>"+g+" nd</span></div>"+
+   "<div class='item'><span>🌊 الأمواج</span><span>"+wh+"</span></div>"+
+   "<div class='"+(safe?"safe":"danger")+"'>"+(safe?"✅ ظروف آمنة للصيد":"⚠️ رياح قوية — احذر!")+"</div>"+
+   "<div class='item' style='border:0'><span>📊 اليوم</span><span>"+d.daily.temperature_2m_max[0]+"° / "+d.daily.temperature_2m_min[0]+"°</span></div>"+
+   "</div></div>",{className:"redline-popup",maxWidth:300}).openPopup();
+ }catch(err){
+  clickMarker.bindPopup("<div class='card'><div class='head'><strong>⚠️ خطأ في الاتصال</strong></div></div>",{className:"redline-popup",maxWidth:300}).openPopup();
+ }
+});
+
 </script>
 </body>
 </html>
