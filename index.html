@@ -287,7 +287,8 @@ if(q.length<3){box.classList.add('hidden');return}
 sTimeout=setTimeout(function(){
 fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q+' Tunisia')+'&limit=6&accept-language=ar')
 .then(function(r){return r.json()}).then(function(results){
-if(!results||!results.length){box='<div class="px-3 py-2 text-xs text-gray-400">❌ لا نتائج</div>';box.classList.remove('hidden');return}
+if(!results||!results.length){box.innerHTML='<div class="px-3 py-2 text-xs text-gray-400">❌ لا نتائج</div>';box.classList.remove('hidden');return}
+
 var html='';
 results.forEach(function(r){var name=r.display_name.replace(/'/g,"");
 html+='<div onclick="goTo('+r.lat+','+r.lon+',\''+name+'\')" class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">📍 '+r.display_name+'</div>'});
