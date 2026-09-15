@@ -21,6 +21,7 @@ body.light{background:#e2e8f0;color:#0f172a}
 .switch.on{background:#dc2626}
 .switch::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s}
 .switch.on::after{left:25px}
+.float-btn{position:absolute;glass:true;z-index:1000;width:44px;height:44px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:20px}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#dc2626;border-radius:9px}
 </style>
 </head>
@@ -48,10 +49,10 @@ body.light{background:#e2e8f0;color:#0f172a}
 <div class="flex flex-1 overflow-hidden">
   <aside id="sidebar" class="hidden md:flex w-56 glass flex-col gap-1 p-2 text-sm" dir="ltr">
     <a class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🗺️ <span data-i18n="carte">Carte</span></a>
-    <a class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🌤️ <span data-i18n="meteo">Météo & Mer</span></a>
+    <a onclick="togglePanel('weatherPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🌤️ <span data-i18n="meteo">Météo & Mer</span></a>
     <a class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🎣 <span data-i18n="peche">Pêche</span></a>
     <a onclick="openSpecies()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🐠 <span data-i18n="especes">Espèces</span></a>
-    <a class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📍 <span data-i18n="zones">Zones</span></a>
+    <a onclick="togglePanel('layersPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📍 <span data-i18n="zones">Zones</span></a>
     <a onclick="togglePanel('forecastPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📅 <span data-i18n="previsions">Prévisions</span></a>
     <a onclick="openFavs()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">⭐ <span data-i18n="favoris">Favoris</span></a>
     <a class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">⚙️ <span data-i18n="param">Paramètres</span></a>
@@ -61,20 +62,32 @@ body.light{background:#e2e8f0;color:#0f172a}
   <main class="flex-1 relative">
     <div id="map" class="w-full h-full"></div>
 
-    <div class="absolute top-3 right-3 left-3 md:left-auto md:w-80 glass rounded-2xl p-3 z-[1000]">
-      <div class="flex justify-between text-center text-[10px] md:text-xs mb-3">
-        <button onclick="setLayer('vent')" id="btn-vent" class="layer-btn bg-red-600 rounded-lg px-2 py-2 font-bold">🌬️ Vent</button>
-        <button onclick="setLayer('vagues')" id="btn-vagues" class="layer-btn rounded-lg px-2 py-2">🌊 Vagues</button>
-        <button onclick="setLayer('courants')" id="btn-courants" class="layer-btn rounded-lg px-2 py-2">🧭 Courants</button>
-        <button onclick="setLayer('temp')" id="btn-temp" class="layer-btn rounded-lg px-2 py-2">🌡️ Temp.</button>
+    <!-- أزرار عائمة -->
+    <button onclick="togglePanel('weatherPanel')" class="float-btn glass top-3 right-3 md:hidden">🌬️</button>
+    <button onclick="togglePanel('layersPanel')" class="float-btn glass top-[5.5rem] right-3 md:hidden">⚙️</button>
+
+    <!-- لوحة الطقس: مخفية على الموبايل، ظاهرة على الكمبيوتر -->
+    <div id="weatherPanel" class="hidden md:block absolute top-3 right-3 left-3 md:left-auto md:w-80 glass rounded-2xl p-3 z-[1000]">
+      <div class="flex justify-between items-center mb-3">
+        <div class="flex justify-between text-center text-[10px] md:text-xs gap-1 flex-1">
+          <button onclick="setLayer('vent')" id="btn-vent" class="layer-btn bg-red-600 rounded-lg px-2 py-2 font-bold">🌬️ Vent</button>
+          <button onclick="setLayer('vagues')" id="btn-vagues" class="layer-btn rounded-lg px-2 py-2">🌊 Vagues</button>
+          <button onclick="setLayer('courants')" id="btn-courants" class="layer-btn rounded-lg px-2 py-2">🧭 Courants</button>
+          <button onclick="setLayer('temp')" id="btn-temp" class="layer-btn rounded-lg px-2 py-2">🌡️ Temp.</button>
+        </div>
+        <button onclick="togglePanel('weatherPanel')" class="text-gray-400 ml-2 md:hidden">✕</button>
       </div>
       <p class="text-sm mb-1" id="windLabel">🌬️ Vitesse du vent</p>
       <div class="h-2 rounded-full bg-gradient-to-r from-blue-500 via-yellow-400 to-red-600 mb-3"></div>
       <div id="liveData" class="text-xs border-t border-white/10 pt-2"><p class="text-gray-400">⏳ Chargement...</p></div>
     </div>
 
-    <div class="absolute top-60 right-3 w-64 md:w-80 glass rounded-2xl p-3 z-[1000] text-sm space-y-2">
-      <p class="font-bold" data-i18n="couches">Couches</p>
+    <!-- لوحة الطبقات: مخفية على الموبايل -->
+    <div id="layersPanel" class="hidden md:block absolute top-[16.5rem] right-3 w-64 md:w-80 glass rounded-2xl p-3 z-[1000] text-sm space-y-2">
+      <div class="flex justify-between items-center mb-1">
+        <p class="font-bold" data-i18n="couches">Couches</p>
+        <button onclick="togglePanel('layersPanel')" class="text-gray-400 md:hidden">✕</button>
+      </div>
       <div class="flex justify-between items-center"><span>🗿 <span data-i18n="fond">Fond marin</span></span><div class="switch" onclick="this.classList.toggle('on')"></div></div>
       <div class="flex justify-between items-center"><span>🎣 <span data-i18n="zonesP">Zones de pêche</span></span><div class="switch on" onclick="this.classList.toggle('on');toggleZones()"></div></div>
       <div class="flex justify-between items-center"><span>🌊 <span data-i18n="waves">Vagues</span></span><div class="switch" onclick="this.classList.toggle('on');toggleWaves()"></div></div>
@@ -99,7 +112,7 @@ body.light{background:#e2e8f0;color:#0f172a}
 </footer>
 
 <nav class="md:hidden glass fixed bottom-0 inset-x-0 z-[3000] flex justify-around py-2 text-xs">
-  <button onclick="togglePanel('forecastPanel',true)" class="flex flex-col items-center px-2">🗺️<span data-i18n="carte">Carte</span></button>
+  <button onclick="togglePanel('weatherPanel')" class="flex flex-col items-center px-2">🌬️<span data-i18n="meteo">Météo</span></button>
   <button onclick="openSpecies()" class="flex flex-col items-center px-2">🐠<span data-i18n="especes">Espèces</span></button>
   <button onclick="togglePanel('forecastPanel')" class="flex flex-col items-center px-2">📅<span data-i18n="previsions">Prév.</span></button>
   <button onclick="openFavs()" class="flex flex-col items-center px-2">⭐<span data-i18n="favoris">Favoris</span></button>
@@ -197,8 +210,8 @@ function toggleTheme(){
 }
 
 var i18n={
- fr:{carte:"Carte",meteo:"Météo & Mer",peche:"Pêche",especes:"Espèces",zones:"Zones",previsions:"Prévisions 7 jours",favoris:"Favoris",param:"Paramètres",couches:"Couches",fond:"Fond marin",zonesP:"Zones de pêche",habitat:"Habitat",meteoAct:"Météo actuelle",vaguesF:"Vagues",ventF:"Vent",meilleures:"Meilleures zones",windLabel:"🌬️ Vitesse du vent",search:"🔍 Rechercher...",slogan:"Plus qu'une carte...<br><b>votre allié en mer</b>",waves:"Vagues",favTitle:"Mes Favoris",login:"Compte",loginT:"Connexion",enter:"Entrer",logout:"Sortir",noFav:"Aucun favori"},
- ar:{carte:"الخريطة",meteo:"الطقس والبحر",peche:"الصيد",especes:"الأنواع",zones:"المناطق",previsions:"توقعات 7 أيام",favoris:"المفضلة",param:"الإعدادات",couches:"الطبقات",fond:"قاع البحر",zonesP:"مناطق الصيد",habitat:"الموطن",meteoAct:"الطقس الحالي",vaguesF:"الأمواج",ventF:"الرياح",meilleures:"أفضل المناطق",windLabel:"🌬️ سرعة الرياح",search:"🔍 ابحث عن مكان...",slogan:"أكثر من خريطة...<br><b>رفيقك في البحر</b>",waves:"الأمواج",favTitle:"مفضلتي",login:"حسابي",loginT:"تسجيل الدخول",enter:"دخول",logout:"خروج",noFav:"لا مفضلة بعد"}
+ fr:{carte:"Carte",meteo:"Météo",peche:"Pêche",especes:"Espèces",zones:"Zones",previsions:"Prévisions 7 jours",favoris:"Favoris",param:"Paramètres",couches:"Couches",fond:"Fond marin",zonesP:"Zones de pêche",habitat:"Habitat",meteoAct:"Météo actuelle",vaguesF:"Vagues",ventF:"Vent",meilleures:"Meilleures zones",windLabel:"🌬️ Vitesse du vent",search:"🔍 Rechercher...",slogan:"Plus qu'une carte...<br><b>votre allié en mer</b>",waves:"Vagues",favTitle:"Mes Favoris",login:"Compte",loginT:"Connexion",enter:"Entrer",logout:"Sortir",noFav:"Aucun favori"},
+ ar:{carte:"الخريطة",meteo:"الطقس",peche:"الصيد",especes:"الأنواع",zones:"المناطق",previsions:"توقعات 7 أيام",favoris:"المفضلة",param:"الإعدادات",couches:"الطبقات",fond:"قاع البحر",zonesP:"مناطق الصيد",habitat:"الموطن",meteoAct:"الطقس الحالي",vaguesF:"الأمواج",ventF:"الرياح",meilleures:"أفضل المناطق",windLabel:"🌬️ سرعة الرياح",search:"🔍 ابحث عن مكان...",slogan:"أكثر من خريطة...<br><b>رفيقك في البحر</b>",waves:"الأمواج",favTitle:"مفضلتي",login:"حسابي",loginT:"تسجيل الدخول",enter:"دخول",logout:"خروج",noFav:"لا مفضلة بعد"}
 };
 function toggleLang(){
   lang=(lang==='fr')?'ar':'fr';
@@ -261,8 +274,7 @@ function searchPlace(q){
       .then(function(d){
         var html='';
         (d.features||[]).forEach(function(f){
-          var name=(f.properties.name||'')+' — '+(f.properties.city||f.properties.state||'Tunisie');
-          name=name.replace(/'/g,"");
+          var name=((f.properties.name||'')+' — '+(f.properties.city||f.properties.state||'Tunisie')).replace(/'/g,"");
           html+='<div onclick="goTo('+f.geometry.coordinates[1]+','+f.geometry.coordinates[0]+',\''+name+'\')" class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">📍 '+name+'</div>';
         });
         box.innerHTML=html||'<div class="px-3 py-2 text-xs text-gray-400">❌ لا نتائج</div>';
@@ -331,10 +343,9 @@ function openSpecies(){
 
 function openModal(id){var m=document.getElementById(id);m.classList.remove('hidden');m.classList.add('flex')}
 function closeModal(id){var m=document.getElementById(id);m.classList.add('hidden');m.classList.remove('flex')}
-function togglePanel(id,forceClose){
-  var m=document.getElementById(id);
-  if(forceClose){m.classList.add('hidden');return}
-  m.classList.toggle('hidden');
+function togglePanel(id){
+  document.getElementById(id).classList.toggle('hidden');
+  document.getElementById(id).classList.toggle('md:block');
 }
 function setLayer(mode){
   var btns=document.querySelectorAll('.layer-btn');
