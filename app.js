@@ -340,8 +340,7 @@ async function loadRealData(view) {
       contentTitle.textContent = "Pêche";
 
       contentText.textContent =
-        "Conditions de pêche calculées à partir des données marines.";
-
+       "Conditions de pêche réelles pour " + place + ".";
       let status = "Conditions moyennes";
 
       if (wind <= 15 && wave <= 1.2) {
