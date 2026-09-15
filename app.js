@@ -202,7 +202,320 @@ selectedLocation = {
     );
 
   }
+// =========================
+// REAL WEATHER & SEA DATA
+// =========================
 
+const contentGrid = document.getElementById("contentGrid");
+const contentTitle = document.getElementById("contentTitle");
+const contentText = document.getElementById("contentText");
+
+async function loadRealData(view) {
+
+  if (!contentGrid) return;
+
+  const lat = selectedLocation.lat;
+  const lon = selectedLocation.lon;
+  const place = selectedLocation.name;
+
+  contentGrid.innerHTML =
+    "<div class='info-card'>" +
+    "<b>⏳</b>" +
+    "<span>Chargement des données...</span>" +
+    "</div>";
+
+  try {
+
+    const weatherUrl =
+      "https://api.open-meteo.com/v1/forecast" +
+      "?latitude=" + lat +
+      "&longitude=" + lon +
+      "&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code" +
+      "&hourly=temperature_2m,wind_speed_10m,wind_direction_10m" +
+      "&forecast_days=3" +
+      "&timezone=auto";
+
+    const marineUrl =
+      "https://marine-api.open-meteo.com/v1/marine" +
+      "?latitude=" + lat +
+      "&longitude=" + lon +
+      "&current=wave_height,wave_direction,wave_period,sea_surface_temperature,ocean_current_velocity,ocean_current_direction" +
+      "&hourly=wave_height,wave_period,wave_direction" +
+      "&forecast_days=3" +
+      "&timezone=auto";
+
+    const [weatherResponse, marineResponse] =
+      await Promise.all([
+        fetch(weatherUrl),
+        fetch(marineUrl)
+      ]);
+
+    if (!weatherResponse.ok || !marineResponse.ok) {
+      throw new Error("API request failed");
+    }
+
+    const weather = await weatherResponse.json();
+    const marine = await marineResponse.json();
+
+    const temperature =
+      weather.current?.temperature_2m ?? "--";
+
+    const wind =
+      weather.current?.wind_speed_10m ?? "--";
+
+    const windDirection =
+      weather.current?.wind_direction_10m ?? "--";
+
+    const wave =
+      marine.current?.wave_height ?? "--";
+
+    const wavePeriod =
+      marine.current?.wave_period ?? "--";
+
+    const seaTemp =
+      marine.current?.sea_surface_temperature ?? "--";
+
+    const current =
+      marine.current?.ocean_current_velocity ?? "--";
+
+    const currentDirection =
+      marine.current?.ocean_current_direction ?? "--";
+
+    // =========================
+    // METEO & MER
+    // =========================
+
+    if (view === "weather") {
+
+      contentTitle.textContent = "Météo & Mer";
+
+      contentText.textContent =
+        "Conditions réelles pour " + place;
+
+      contentGrid.innerHTML =
+
+        "<div class='info-card'>" +
+        "<b>🌡️</b>" +
+        "<span>Température</span>" +
+        "<strong>" + temperature + " °C</strong>" +
+        "<small>Conditions actuelles</small>" +
+        "</div>" +
+
+        "<div class='info-card'>" +
+        "<b>💨</b>" +
+        "<span>Vent</span>" +
+        "<strong>" + wind + " km/h</strong>" +
+        "<small>Direction " + windDirection + "°</small>" +
+        "</div>" +
+
+        "<div class='info-card'>" +
+        "<b>🌊</b>" +
+        "<span>Hauteur des vagues</span>" +
+        "<strong>" + wave + " m</strong>" +
+        "<small>Période " + wavePeriod + " s</small>" +
+        "</div>" +
+
+        "<div class='info-card'>" +
+        "<b>🌡️</b>" +
+        "<span>Température de la mer</span>" +
+        "<strong>" + seaTemp + " °C</strong>" +
+        "<small>Surface de la mer</small>" +
+        "</div>" +
+
+        "<div class='info-card'>" +
+        "<b>〰️</b>" +
+        "<span>Courant marin</span>" +
+        "<strong>" + current + " km/h</strong>" +
+        "<small>Direction " + currentDirection + "°</small>" +
+        "</div>";
+
+    }
+
+    // =========================
+    // PECHE
+    // =========================
+
+    else if (view === "fishing") {
+
+      contentTitle.textContent = "Pêche";
+
+      contentText.textContent =
+        "Conditions de pêche calculées à partir des données marines.";
+
+      let status = "Conditions moyennes";
+
+      if (wind <= 15 && wave <= 1.2) {
+        status = "🎣 Bonnes conditions";
+      }
+
+      if (wind > 25 || wave > 2) {
+        status = "⚠️ Conditions difficiles";
+      }
+
+      contentGrid.innerHTML =
+
+        "<div class='info-card'>" +
+        "<b>🎣</b>" +
+        "<span>État de la pêche</span>" +
+        "<strong>" + status + "</strong>" +
+        "<small>" + place + "</small>" +
+        "</div>" +
+
+        "<div class='info-card'>" +
+        "<b>💨</b>" +
+        "<span>Vent</span>" +
+        "<strong>" + wind + " km/h</strong>" +
+        "<small>Direction " + windDirection + "°</small>" +
+        "</div>" +
+
+        "<div class='info-card'>" +
+        "<b>🌊</b>" +
+        "<span>Mer</span>" +
+        "<strong>" + wave + " m</strong>" +
+        "<small>Vagues</small>" +
+        "</div>";
+
+    }
+
+    // =========================
+    // ESPECES
+    // =========================
+
+    else if (view === "species") {
+
+      contentTitle.textContent = "Espèces";
+
+      contentText.textContent =
+        "Recommandations selon les conditions actuelles.";
+
+      let species = "Daurade · Sar · Loup";
+
+      if (wave > 1.5) {
+        species = "Loup · Sar · Mérou";
+      }
+
+      contentGrid.innerHTML =
+
+        "<div class='info-card'>" +
+        "<b>🐟</b>" +
+        "<span>Espèces recommandées</span>" +
+        "<strong>" + species + "</strong>" +
+        "<small>Selon les conditions marines</small>" +
+        "</div>" +
+
+        "<div class='info-card'>" +
+        "<b>🌊</b>" +
+        "<span>État de la mer</span>" +
+        "<strong>" + wave + " m</strong>" +
+        "<small>Hauteur des vagues</small>" +
+        "</div>";
+
+    }
+
+    // =========================
+    // ZONES
+    // =========================
+
+    else if (view === "zones") {
+
+      contentTitle.textContent = "Zones";
+
+      contentText.textContent =
+        "Analyse des conditions autour de " + place;
+
+      let recommendation = "Zone normale";
+
+      if (wind <= 15 && wave <= 1.2) {
+        recommendation = "⭐ Zone favorable";
+      }
+
+      if (wind > 25 || wave > 2) {
+        recommendation = "⚠️ Zone déconseillée";
+      }
+
+      contentGrid.innerHTML =
+
+        "<div class='info-card'>" +
+        "<b>📍</b>" +
+        "<span>Zone sélectionnée</span>" +
+        "<strong>" + place + "</strong>" +
+        "<small>" + recommendation + "</small>" +
+        "</div>" +
+
+        "<div class='info-card'>" +
+        "<b>💨</b>" +
+        "<span>Vent</span>" +
+        "<strong>" + wind + " km/h</strong>" +
+        "<small>Direction " + windDirection + "°</small>" +
+        "</div>" +
+
+        "<div class='info-card'>" +
+        "<b>🌊</b>" +
+        "<span>Vagues</span>" +
+        "<strong>" + wave + " m</strong>" +
+        "<small>Période " + wavePeriod + " s</small>" +
+        "</div>";
+
+    }
+
+    // =========================
+    // PREVISIONS
+    // =========================
+
+    else if (view === "forecast") {
+
+      contentTitle.textContent = "Prévisions";
+
+      contentText.textContent =
+        "Prévisions météo et marines pour " + place;
+
+      const times =
+        weather.hourly?.time || [];
+
+      const temps =
+        weather.hourly?.temperature_2m || [];
+
+      const winds =
+        weather.hourly?.wind_speed_10m || [];
+
+      const waves =
+        marine.hourly?.wave_height || [];
+
+      let html = "";
+
+      for (let i = 0; i < Math.min(6, times.length); i++) {
+
+        html +=
+          "<div class='info-card'>" +
+          "<b>🕐</b>" +
+          "<span>" + times[i] + "</span>" +
+          "<strong>" + temps[i] + " °C</strong>" +
+          "<small>💨 " + winds[i] +
+          " km/h · 🌊 " + waves[i] + " m</small>" +
+          "</div>";
+
+      }
+
+      contentGrid.innerHTML = html;
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Erreur API météo/mer :",
+      error
+    );
+
+    contentGrid.innerHTML =
+      "<div class='info-card'>" +
+      "<b>⚠️</b>" +
+      "<span>Erreur</span>" +
+      "<strong>Données indisponibles</strong>" +
+      "<small>Vérifiez votre connexion Internet.</small>" +
+      "</div>";
+  }
+}
 
   // =========================
   // ARABIC / FRENCH
