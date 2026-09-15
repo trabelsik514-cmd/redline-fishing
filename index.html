@@ -18,7 +18,6 @@ body{font-family:Tahoma,sans-serif}
 </head>
 <body class="bg-slate-950 text-white h-screen flex flex-col">
 
-<!-- شاشة الدخول -->
 <div id="authScreen" class="fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center p-4">
   <div class="glass rounded-3xl w-full max-w-sm p-6 text-center">
     <p class="text-6xl mb-2">🎣</p>
@@ -34,7 +33,6 @@ body{font-family:Tahoma,sans-serif}
   </div>
 </div>
 
-<!-- الهيدر -->
 <header class="glass flex items-center gap-2 px-3 py-2 z-20">
   <span class="text-2xl">🐟</span>
   <h1 class="font-black italic hidden sm:block"><span class="text-red-600">RED</span> LINE</h1>
@@ -43,24 +41,20 @@ body{font-family:Tahoma,sans-serif}
   <button onclick="toggleLang()" class="bg-red-600 rounded-full px-2.5 py-1.5 text-xs font-bold" id="langBtn">🌐 FR</button>
   <button onclick="logoutUser()" class="hidden text-lg" id="logoutBtn">🚪</button>
 </header>
+
 <div class="relative flex-1">
   <div id="searchResults" class="absolute top-1 left-3 right-3 glass rounded-xl hidden max-h-60 overflow-y-auto z-[2000]"></div>
   <div id="map" class="w-full h-full"></div>
-
-  <!-- لوحة الطقس -->
   <div class="absolute top-3 right-3 glass rounded-2xl p-3 z-[1000] w-64 text-sm">
     <div id="liveData"><p class="text-gray-400 text-xs">⏳ ...</p></div>
     <div id="sunBox" class="mt-2 text-xs border-t border-white/10 pt-2 hidden"></div>
   </div>
-
-  <!-- توقعات 7 أيام -->
   <div class="absolute bottom-3 left-3 right-3 md:right-auto md:w-[430px] glass rounded-2xl p-3 z-[1000]">
     <p class="font-bold text-sm mb-2" id="fcTitle">📅 Prévisions 7 jours</p>
     <div id="forecastContent" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
   </div>
 </div>
 
-<!-- الأنواع والمفضلة -->
 <nav class="glass flex justify-around py-2 text-xs z-20">
   <button onclick="openSpecies()" class="px-2">🐠<br>Espèces</button>
   <button onclick="openFavs()" class="px-2">⭐<br>Favoris</button>
@@ -84,28 +78,24 @@ firebase.initializeApp({apiKey:"AIzaSyCKLRKGwp5XBtEmwjMdrmDWg7-9S29ixgA",authDom
 var auth=firebase.auth(),db=firebase.firestore();
 var lang='fr',currentLat=36.8,currentLon=11.5,currentUser=null,favs=[];
 
-/* ===== المصادقة ===== */
 function showMsg(t){var e=document.getElementById('authError');e.textContent=t;e.classList.remove('hidden')}
+function Email(){return document.getElementById('authEmail').value.trim()}
+function Pass(){return document.getElementById('authPass').value}
 function authRegister(){auth.createUserWithEmailAndPassword(Email(),Pass()).catch(function(e){showMsg(e.message)})}
 function authEnter(){auth.signInWithEmailAndPassword(Email(),Pass()).catch(function(e){showMsg(e.message)})}
 function resetPass(){auth.sendPasswordResetEmail(Email()).then(function(){showMsg('📧 رابط الاستعادة أُرسل')}).catch(function(e){showMsg(e.message)})}
-function Email(){return document.getElementById('authEmail').value.trim()}
-function Pass(){return document.getElementById('authPass').value}
 function logoutUser(){auth.signOut()}
 auth.onAuthStateChanged(function(u){
-  currentUser=u;
-  document.getElementById('authScreen').style.display=u?'none':'flex';
-  document.getElementById('logoutBtn').classList.toggle('hidden',!u);
-  if(u){loadFavs();if(window.map)map.invalidateSize()}
-});
+currentUser=u;
+document.getElementById('authScreen').style.display=u?'none':'flex';
+document.getElementById('logoutBtn').classList.toggle('hidden',!u);
+if(u){loadFavs();if(window.map)map.invalidateSize()}});
 
-/* ===== الخريطة ===== */
 var map=L.map('map').setView([36.8,11.5],7);
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri'}).addTo(map);
 var fishIcon=L.divIcon({className:'',html:'<div class="fish-pin"><span>🐟</span></div>',iconSize:[30,30]});
 [[37.1,10.4],[36.2,11.6],[35.1,11.4],[34.5,11.2]].forEach(function(p){L.marker(p,{icon:fishIcon}).addTo(map).bindPopup('🎣 منطقة صيد')});
 
-/* ===== الأنواع ===== */
 var species=[
 {fr:"Daurade Royale",ar:"الدنيس",icon:"🐟",season:"Sep→Déc",size:"35cm",desc:"قرب الصخور"},
 {fr:"Loup de Mer",ar:"القاروص",icon:"🐠",season:"Oct→Mar",size:"30cm",desc:"الخلجان"},
@@ -119,40 +109,34 @@ document.getElementById('speciesList').innerHTML=h}
 function openSpecies(){renderSpecies();var m=document.getElementById('speciesModal');m.classList.remove('hidden');m.classList.add('flex')}
 function closeModal(id){var m=document.getElementById(id);m.classList.add('hidden');m.classList.remove('flex')}
 
-/* ===== الطقس + التوقعات ===== */
 function wIcon(c){return c===0?'☀️':c<=3?'⛅':c<=67?'🌧️':'⛈️'}
 function fetchWeather(){
 fetch('https://api.open-meteo.com/v1/forecast?latitude='+currentLat+'&longitude='+currentLon+'&current=temperature_2m,wind_speed_10m&daily=wave_height_max,temperature_2m_max,temperature_2m_min,weather_code,wind_speed_10m_max&timezone=auto')
 .then(function(r){return r.json()}).then(function(d){
-  var nd=(d.current.wind_speed_10m/1.852).toFixed(1);
-  document.getElementById('liveData').innerHTML='<p>🌡️ '+d.current.temperature_2m+'°C • 🌬️ '+nd+' nd • 🌊 '+(d.daily.wave_height_max[0]||'--')+' m</p>';
-  var days=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],h='';
-  for(var i=0;i<7;i++){var day=new Date(d.daily.time[i]);
-  h+='<div class="glass rounded-lg p-1"><p class="text-gray-400">'+days[day.getDay()]+'</p><p class="text-base">'+wIcon(d.daily.weather_code[i])+'</p><p class="font-bold">'+d.daily.temperature_2m_max[i]+'°</p><p class="text-cyan-300 text-[10px]">🌊'+(d.daily.wave_height_max[i]||'--')+'m</p></div>'}
-  document.getElementById('forecastContent').innerHTML=h;
-})}
+var nd=(d.current.wind_speed_10m/1.852).toFixed(1);
+document.getElementById('liveData').innerHTML='<p>🌡️ '+d.current.temperature_2m+'°C • 🌬️ '+nd+' nd • 🌊 '+(d.daily.wave_height_max[0]||'--')+' m</p>';
+var days=lang==='fr'?['Dim','Lun','Mar','Mer','Jeu','Ven','Sam']:['أحد','إثن','ثلا','أرب','خمي','جمع','سبت'],h='';
+for(var i=0;i<7;i++){var day=new Date(d.daily.time[i]);
+h+='<div class="glass rounded-lg p-1"><p class="text-gray-400">'+days[day.getDay()]+'</p><p class="text-base">'+wIcon(d.daily.weather_code[i])+'</p><p class="font-bold">'+d.daily.temperature_2m_max[i]+'°</p><p class="text-cyan-300 text-[10px]">🌊'+(d.daily.wave_height_max[i]||'--')+'m</p></div>'}
+document.getElementById('forecastContent').innerHTML=h})}
 fetchWeather();
 
-/* ===== GPS + شروق/غروب ===== */
 function myLocation(){
-  navigator.geolocation.getCurrentPosition(function(pos){
-    var la=pos.coords.latitude,lo=pos.coords.longitude;
-    currentLat=la;currentLon=lo;
-    map.setView([la,lo],13);
-    L.marker([la,lo]).addTo(map).bindPopup('📍 أنت هنا').openOn(map);
-    fetchWeather();
-    fetch('https://api.open-meteo.com/v1/forecast?latitude='+la+'&longitude='+lo+'&daily=sunrise,sunset&current=wind_speed_10m&timezone=auto')
-    .then(function(r){return r.json()}).then(function(d){
-      var sr=d.daily.sunrise[0].split('T')[1],ss=d.daily.sunset[0].split('T')[1];
-      var nd=(d.current.wind_speed_10m/1.852).toFixed(1);
-      var box=document.getElementById('sunBox');
-      box.classList.remove('hidden');
-      box.innerHTML='<p>🌅 '+sr+' — 🌇 '+ss+'</p><p>'+(nd<15?'✅ الرياح آمنة':'⚠️ رياح قوية!')+'</p>';
-    });
-  },function(){alert('⚠️ فعّل GPS')},{enableHighAccuracy:true,timeout:10000});
-}
+navigator.geolocation.getCurrentPosition(function(pos){
+var la=pos.coords.latitude,lo=pos.coords.longitude;
+currentLat=la;currentLon=lo;
+map.setView([la,lo],13);
+L.marker([la,lo]).addTo(map).bindPopup('📍 أنت هنا').openOn(map);
+fetchWeather();
+fetch('https://api.open-meteo.com/v1/forecast?latitude='+la+'&longitude='+lo+'&daily=sunrise,sunset&current=wind_speed_10m&timezone=auto')
+.then(function(r){return r.json()}).then(function(d){
+var sr=d.daily.sunrise[0].split('T')[1],ss=d.daily.sunset[0].split('T')[1];
+var nd=(d.current.wind_speed_10m/1.852).toFixed(1);
+var box=document.getElementById('sunBox');
+box.classList.remove('hidden');
+box.innerHTML='<p>🌅 '+sr+' — 🌇 '+ss+'</p><p>'+(nd<15?'✅ الرياح آمنة':'⚠️ رياح قوية!')+'</p>'});
+},function(){alert('⚠️ فعّل GPS')},{enableHighAccuracy:true,timeout:10000})}
 
-/* ===== المفضلة ===== */
 function loadFavs(){if(!currentUser)return;
 db.collection('favs').doc(currentUser.uid).collection('places').get().then(function(q){favs=[];q.forEach(function(d){favs.push(d.data())});renderFavs()})}
 function addFav(lat,lon,name){if(!currentUser){alert('سجّل دخولك أولاً');return}
@@ -166,7 +150,6 @@ h+='<div class="flex justify-between glass rounded-xl p-2"><span onclick="goTo('
 box.innerHTML=h}
 function openFavs(){renderFavs();var m=document.getElementById('favModal');m.classList.remove('hidden');m.classList.add('flex')}
 
-/* ===== البحث ===== */
 var sT;
 function searchPlace(q){clearTimeout(sT);
 var box=document.getElementById('searchResults');
@@ -184,10 +167,10 @@ L.popup().setLatLng([lat,lon]).setContent('<b>'+name+'</b><br><button onclick="a
 currentLat=lat;currentLon=lon;fetchWeather();
 document.getElementById('searchResults').classList.add('hidden')}
 
-/* ===== اللغة ===== */
 function toggleLang(){lang=lang==='fr'?'ar':'fr';
 document.getElementById('langBtn').textContent=lang==='fr'?'🌐 FR':'🌐 AR';
-document.getElementById('fcTitle').textContent=lang==='fr'?'📅 Prévisions 7 jours':'📅 توقعات 7 أيام'}
+document.getElementById('fcTitle').textContent=lang==='fr'?'📅 Prévisions 7 jours':'📅 توقعات 7 أيام';
+renderSpecies()}
 </script>
 </body>
 </html>
