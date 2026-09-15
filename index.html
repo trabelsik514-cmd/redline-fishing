@@ -8,62 +8,91 @@
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script src="https://cdn.tailwindcss.com"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
+
 <style>
 
+/* =========================================================
+   GENERAL
+========================================================= */
+
+*{
+  box-sizing:border-box;
+}
+
 body{
-  font-family:'Segoe UI',Tahoma,sans-serif
-}
-
-.sidebar-item:hover{
-  background:rgba(220,38,38,.2)
-}
-
-.sidebar-item.active{
-  background:#dc2626
-}
-
-.glass{
-  background:rgba(10,20,40,.85);
-  backdrop-filter:blur(8px);
-  border:1px solid rgba(255,255,255,.1)
-}
-
-body.light .glass{
-  background:rgba(255,255,255,.92);
-  border:1px solid rgba(0,0,0,.1);
-  color:#0f172a
+  font-family:'Segoe UI',Tahoma,Arial,sans-serif;
 }
 
 body.light{
   background:#e2e8f0;
-  color:#0f172a
+  color:#0f172a;
 }
 
-.fish-pin{
+button,
+input{
+  font-family:inherit;
+}
+
+::-webkit-scrollbar{
+  width:6px;
+}
+
+::-webkit-scrollbar-thumb{
   background:#dc2626;
-  width:34px;
-  height:34px;
-  border-radius:50% 50% 50% 0;
-  transform:rotate(-45deg);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:2px solid #fff;
-  box-shadow:0 4px 12px rgba(0,0,0,.35)
+  border-radius:9px;
 }
 
-.fish-pin span{
-  transform:rotate(45deg);
-  font-size:16px
+
+/* =========================================================
+   GLASS
+========================================================= */
+
+.glass{
+  background:rgba(7,15,30,.88);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 10px 35px rgba(0,0,0,.18);
 }
+
+body.light .glass{
+  background:rgba(255,255,255,.94);
+  border:1px solid rgba(0,0,0,.08);
+  color:#0f172a;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar-item{
+  transition:.2s;
+}
+
+.sidebar-item:hover{
+  background:rgba(220,38,38,.20);
+}
+
+.sidebar-item.active{
+  background:#dc2626;
+}
+
+
+/* =========================================================
+   SWITCH
+========================================================= */
 
 .switch{
   width:44px;
@@ -73,11 +102,11 @@ body.light{
   position:relative;
   cursor:pointer;
   transition:.3s;
-  flex-shrink:0
+  flex-shrink:0;
 }
 
 .switch.on{
-  background:#dc2626
+  background:#dc2626;
 }
 
 .switch::after{
@@ -89,12 +118,17 @@ body.light{
   border-radius:50%;
   top:3px;
   left:3px;
-  transition:.3s
+  transition:.3s;
 }
 
 .switch.on::after{
-  left:25px
+  left:25px;
 }
+
+
+/* =========================================================
+   FLOAT BUTTONS
+========================================================= */
 
 .float-btn{
   position:absolute;
@@ -105,17 +139,251 @@ body.light{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:20px
+  font-size:20px;
 }
 
-::-webkit-scrollbar{
-  width:6px
-}
 
-::-webkit-scrollbar-thumb{
+/* =========================================================
+   FISH MARKER
+========================================================= */
+
+.fish-pin{
   background:#dc2626;
-  border-radius:9px
+  width:38px;
+  height:38px;
+  border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid white;
+  box-shadow:
+    0 5px 15px rgba(220,38,38,.45);
 }
+
+.fish-pin span{
+  transform:rotate(45deg);
+  font-size:18px;
+}
+
+
+/* =========================================================
+   USER LOCATION
+========================================================= */
+
+.user-pin{
+  width:20px;
+  height:20px;
+  background:#2563eb;
+  border:3px solid white;
+  border-radius:50%;
+  box-shadow:
+    0 0 0 8px rgba(37,99,235,.18),
+    0 0 20px rgba(37,99,235,.8);
+}
+
+
+/* =========================================================
+   WAVE MARKERS
+========================================================= */
+
+.wave-marker{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:12px;
+  font-weight:800;
+  border:2px solid rgba(255,255,255,.9);
+  box-shadow:
+    0 5px 18px rgba(0,0,0,.35);
+}
+
+.wave-low{
+  background:#16a34a;
+}
+
+.wave-medium{
+  background:#eab308;
+  color:#111827;
+}
+
+.wave-high{
+  background:#f97316;
+}
+
+.wave-danger{
+  background:#dc2626;
+}
+
+
+/* =========================================================
+   MODERN POPUP
+========================================================= */
+
+.redline-popup .leaflet-popup-content-wrapper{
+  background:#ffffff;
+  color:#111827;
+  border-radius:16px;
+  padding:0;
+  box-shadow:
+    0 12px 40px rgba(0,0,0,.30);
+  overflow:hidden;
+}
+
+.redline-popup .leaflet-popup-content{
+  margin:0;
+  width:280px !important;
+}
+
+.redline-popup .leaflet-popup-tip{
+  background:#ffffff;
+}
+
+.redline-card{
+  width:100%;
+  font-family:'Segoe UI',Tahoma,sans-serif;
+}
+
+.redline-header{
+  background:
+    linear-gradient(
+      135deg,
+      #ef4444,
+      #b91c1c,
+      #7f1d1d
+    );
+  color:white;
+  padding:14px 15px;
+}
+
+.redline-title{
+  font-size:14px;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.redline-subtitle{
+  font-size:10px;
+  opacity:.85;
+  margin-top:3px;
+}
+
+.redline-body{
+  padding:11px 13px 13px;
+}
+
+.redline-row{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:7px 0;
+  border-bottom:1px solid #f1f5f9;
+  font-size:12px;
+}
+
+.redline-row:last-of-type{
+  border-bottom:none;
+}
+
+.redline-icon{
+  width:25px;
+  text-align:center;
+  font-size:16px;
+}
+
+.redline-label{
+  color:#64748b;
+}
+
+.redline-value{
+  margin-left:auto;
+  font-weight:800;
+  color:#111827;
+}
+
+.redline-safe{
+  margin-top:9px;
+  background:#dcfce7;
+  color:#15803d;
+  border-radius:10px;
+  padding:8px;
+  text-align:center;
+  font-size:11px;
+  font-weight:800;
+}
+
+.redline-danger{
+  margin-top:9px;
+  background:#fee2e2;
+  color:#b91c1c;
+  border-radius:10px;
+  padding:8px;
+  text-align:center;
+  font-size:11px;
+  font-weight:800;
+}
+
+.redline-fav{
+  width:100%;
+  margin-top:10px;
+  border:0;
+  border-radius:999px;
+  background:#dc2626;
+  color:white;
+  padding:9px 12px;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.redline-fav:hover{
+  background:#b91c1c;
+  transform:translateY(-1px);
+}
+
+.redline-loading{
+  padding:18px;
+  text-align:center;
+  font-size:12px;
+  color:#64748b;
+}
+
+
+/* =========================================================
+   HOURLY
+========================================================= */
+
+.hourRow{
+  display:flex;
+  gap:4px;
+  overflow-x:auto;
+  padding:4px 0;
+}
+
+.hourCell{
+  min-width:55px;
+  text-align:center;
+  background:rgba(255,255,255,.06);
+  border-radius:10px;
+  padding:6px 2px;
+  font-size:11px;
+}
+
+body.light .hourCell{
+  background:rgba(0,0,0,.05);
+}
+
+
+/* =========================================================
+   COMPASS
+========================================================= */
 
 .compass{
   width:130px;
@@ -123,14 +391,14 @@ body.light{
   border:2px solid rgba(255,255,255,.25);
   border-radius:50%;
   position:relative;
-  margin:0 auto
+  margin:0 auto;
 }
 
 .compass .dir{
   position:absolute;
   font-size:11px;
   color:#94a3b8;
-  font-weight:bold
+  font-weight:bold;
 }
 
 .compass .arrow{
@@ -139,10 +407,11 @@ body.light{
   left:50%;
   width:4px;
   height:48px;
-  background:linear-gradient(to top,#dc2626,#fff);
+  background:
+    linear-gradient(to top,#dc2626,#fff);
   transform-origin:bottom center;
   border-radius:4px;
-  transition:transform 1s
+  transition:transform 1s;
 }
 
 .compass .center{
@@ -153,268 +422,135 @@ body.light{
   height:12px;
   background:#dc2626;
   border-radius:50%;
-  transform:translate(-50%,-50%)
-}
-
-.hourRow{
-  display:flex;
-  gap:4px;
-  overflow-x:auto;
-  padding:4px 0
-}
-
-.hourCell{
-  min-width:52px;
-  text-align:center;
-  background:rgba(255,255,255,.06);
-  border-radius:10px;
-  padding:6px 2px;
-  font-size:11px
-}
-
-body.light .hourCell{
-  background:rgba(0,0,0,.05)
+  transform:translate(-50%,-50%);
 }
 
 
 /* =========================================================
-   POPUP MODERNE RED LINE FISHING
-   ========================================================= */
+   MAP
+========================================================= */
 
-.redline-popup .leaflet-popup-content-wrapper{
-  background:#fff;
-  color:#111827;
-  border-radius:18px;
-  padding:0;
-  box-shadow:
-    0 12px 40px rgba(0,0,0,.30),
-    0 3px 12px rgba(0,0,0,.15);
-  overflow:hidden;
+#map{
+  background:#07111f;
 }
 
-.redline-popup .leaflet-popup-content{
-  margin:0;
-  width:290px !important;
+.leaflet-control-zoom a{
+  background:rgba(10,20,40,.92)!important;
+  color:#fff!important;
+  border-color:rgba(255,255,255,.12)!important;
 }
 
-.redline-popup .leaflet-popup-tip{
-  background:#fff;
+.leaflet-control-attribution{
+  background:rgba(0,0,0,.55)!important;
+  color:#ddd!important;
 }
 
-.redline-popup .leaflet-popup-close-button{
-  color:#fff !important;
-  font-size:20px !important;
-  font-weight:bold;
-  top:7px !important;
-  right:9px !important;
-  z-index:10;
-  text-shadow:0 1px 3px rgba(0,0,0,.4);
+.leaflet-control-attribution a{
+  color:#fff!important;
 }
 
-.redline-card{
-  width:100%;
-  font-family:'Segoe UI',Tahoma,sans-serif;
-  overflow:hidden;
-}
 
-.redline-header{
-  background:
-    linear-gradient(
-      135deg,
-      #ef4444 0%,
-      #dc2626 45%,
-      #991b1b 100%
-    );
-  color:#fff;
-  padding:15px 17px 13px;
-}
+/* =========================================================
+   MAP TOP STATUS
+========================================================= */
 
-.redline-title{
-  font-size:15px;
-  font-weight:900;
+.map-status{
+  position:absolute;
+  top:12px;
+  left:12px;
+  z-index:1000;
   display:flex;
-  align-items:center;
-  gap:8px;
-  padding-right:20px;
+  gap:7px;
+  flex-wrap:wrap;
 }
 
-.redline-title-icon{
-  width:31px;
-  height:31px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(255,255,255,.18);
-  border-radius:10px;
-  font-size:18px;
-}
-
-.redline-subtitle{
-  font-size:10px;
-  opacity:.88;
-  margin-top:4px;
-  padding-left:39px;
-}
-
-.redline-body{
-  padding:10px 14px 14px;
-}
-
-.redline-row{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  padding:8px 2px;
-  border-bottom:1px solid #eef2f7;
-  font-size:12px;
-}
-
-.redline-row:last-of-type{
-  border-bottom:none;
-}
-
-.redline-icon{
-  width:28px;
-  height:28px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#f8fafc;
-  border-radius:9px;
-  font-size:15px;
-  flex-shrink:0;
-}
-
-.redline-label{
-  color:#64748b;
-  font-size:11px;
-}
-
-.redline-value{
-  margin-left:auto;
-  font-weight:800;
-  color:#111827;
-  font-size:12px;
-}
-
-.redline-safe{
-  margin-top:9px;
-  background:#dcfce7;
-  color:#15803d;
-  border:1px solid #bbf7d0;
-  border-radius:11px;
-  padding:9px;
-  text-align:center;
-  font-size:11px;
-  font-weight:900;
-}
-
-.redline-danger{
-  margin-top:9px;
-  background:#fee2e2;
-  color:#b91c1c;
-  border:1px solid #fecaca;
-  border-radius:11px;
-  padding:9px;
-  text-align:center;
-  font-size:11px;
-  font-weight:900;
-}
-
-.redline-fav{
-  width:100%;
-  margin-top:10px;
-  border:0;
+.map-badge{
+  background:rgba(5,15,30,.88);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.12);
   border-radius:999px;
-  background:linear-gradient(135deg,#ef4444,#dc2626);
-  color:white;
-  padding:10px 12px;
+  padding:7px 11px;
   font-size:11px;
-  font-weight:900;
-  cursor:pointer;
-  transition:.2s;
-  box-shadow:0 4px 12px rgba(220,38,38,.25);
+  box-shadow:0 5px 20px rgba(0,0,0,.25);
 }
 
-.redline-fav:hover{
-  background:linear-gradient(135deg,#dc2626,#b91c1c);
-  transform:translateY(-1px);
-}
-
-.redline-location{
-  margin-top:8px;
-  text-align:center;
-  color:#94a3b8;
-  font-size:9px;
-}
-
-.redline-loading{
-  padding:22px 15px;
-  text-align:center;
-  font-size:12px;
-  color:#64748b;
-}
-
-.redline-loading-icon{
-  font-size:25px;
-  margin-bottom:6px;
+.map-badge.red{
+  background:#dc2626;
+  border-color:#ef4444;
 }
 
 
 /* =========================================================
-   POPUP ZONES DE PECHE
-   ========================================================= */
+   MAP LEGEND
+========================================================= */
 
-.zone-popup .leaflet-popup-content-wrapper{
-  border-radius:16px;
-  overflow:hidden;
-  box-shadow:0 10px 35px rgba(0,0,0,.3);
+.wave-legend{
+  position:absolute;
+  bottom:18px;
+  left:12px;
+  z-index:1000;
+  background:rgba(5,15,30,.88);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  padding:9px 11px;
+  font-size:10px;
 }
 
-.zone-popup .leaflet-popup-content{
-  margin:0;
-  width:250px !important;
+.legend-row{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin:3px 0;
 }
 
-.zone-card{
-  font-family:'Segoe UI',Tahoma,sans-serif;
+.legend-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
 }
 
-.zone-header{
-  background:linear-gradient(135deg,#dc2626,#991b1b);
-  color:#fff;
-  padding:12px 14px;
-  font-weight:900;
-  font-size:14px;
-}
 
-.zone-body{
-  padding:10px 13px;
-}
+/* =========================================================
+   MOBILE
+========================================================= */
 
-.zone-fish{
-  padding:7px 0;
-  border-bottom:1px solid #f1f5f9;
-  font-size:12px;
-}
+@media(max-width:767px){
 
-.zone-fish:last-child{
-  border-bottom:none;
+  .redline-popup .leaflet-popup-content{
+    width:260px!important;
+  }
+
+  .map-status{
+    top:8px;
+    left:8px;
+    right:60px;
+  }
+
+  .map-badge{
+    font-size:10px;
+    padding:6px 8px;
+  }
+
 }
 
 </style>
 </head>
 
 
-<body class="bg-slate-950 text-white h-screen overflow-hidden flex flex-col pb-14 md:pb-0">
+<body
+  class="bg-slate-950 text-white h-screen overflow-hidden flex flex-col pb-14 md:pb-0"
+>
 
 
 <!-- =========================================================
      AUTH
-     ========================================================= -->
+========================================================= -->
 
-<div id="authScreen"
-     class="fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center p-4">
+<div
+  id="authScreen"
+  class="fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center p-4"
+>
 
   <div class="glass rounded-3xl w-full max-w-sm p-6 text-center">
 
@@ -432,28 +568,34 @@ body.light .hourCell{
       id="authEmail"
       type="email"
       placeholder="📧 البريد / E-mail"
-      class="w-full bg-slate-800/80 rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 ring-red-600 text-center mb-3">
+      class="w-full bg-slate-800/80 rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 ring-red-600 text-center mb-3"
+    >
 
     <input
       id="authPass"
       type="password"
       placeholder="🔒 كلمة السر / Mot de passe"
-      class="w-full bg-slate-800/80 rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 ring-red-600 text-center mb-3">
+      class="w-full bg-slate-800/80 rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 ring-red-600 text-center mb-3"
+    >
 
-    <p id="authError"
-       class="text-red-500 text-xs hidden mb-2"></p>
+    <p
+      id="authError"
+      class="text-red-500 text-xs hidden mb-2"
+    ></p>
 
     <div class="flex gap-2">
 
       <button
         onclick="authEnter()"
-        class="flex-1 bg-red-600 rounded-full py-2.5 text-sm font-bold">
+        class="flex-1 bg-red-600 rounded-full py-2.5 text-sm font-bold"
+      >
         🚪 دخول
       </button>
 
       <button
         onclick="authRegister()"
-        class="flex-1 border border-red-600 rounded-full py-2.5 text-sm font-bold text-red-500">
+        class="flex-1 border border-red-600 rounded-full py-2.5 text-sm font-bold text-red-500"
+      >
         ✍️ اشتراك
       </button>
 
@@ -461,7 +603,8 @@ body.light .hourCell{
 
     <button
       onclick="resetPass()"
-      class="text-[11px] text-gray-400 underline mt-3">
+      class="text-[11px] text-gray-400 underline mt-3"
+    >
       🔑 نسيت كلمة السر؟ / Mot de passe oublié ?
     </button>
 
@@ -470,14 +613,17 @@ body.light .hourCell{
     </p>
 
   </div>
+
 </div>
 
 
 <!-- =========================================================
      HEADER
-     ========================================================= -->
+========================================================= -->
 
-<header class="glass flex items-center gap-2 px-3 py-2 z-20">
+<header
+  class="glass flex items-center gap-2 px-3 py-2 z-20"
+>
 
   <span class="text-2xl">🐟</span>
 
@@ -491,6 +637,7 @@ body.light .hourCell{
     </p>
   </div>
 
+
   <div class="flex-1 relative">
 
     <input
@@ -498,35 +645,40 @@ body.light .hourCell{
       type="text"
       oninput="searchPlace(this.value)"
       placeholder="🔍 Rechercher..."
-      class="w-full bg-slate-800/80 rounded-full px-4 py-2 text-sm outline-none focus:ring-2 ring-red-600">
+      class="w-full bg-slate-800/80 rounded-full px-4 py-2 text-sm outline-none focus:ring-2 ring-red-600"
+    >
 
     <div
       id="searchResults"
-      class="absolute top-full left-0 right-0 mt-1 glass rounded-xl hidden max-h-60 overflow-y-auto z-[2000]">
-    </div>
+      class="absolute top-full left-0 right-0 mt-1 glass rounded-xl hidden max-h-60 overflow-y-auto z-[2000]"
+    ></div>
 
   </div>
+
 
   <div class="flex gap-1 items-center">
 
     <button
       onclick="toggleLang()"
       class="bg-red-600 rounded-full px-3 py-1.5 text-sm font-bold"
-      id="langBtn">
+      id="langBtn"
+    >
       🌐 FR
     </button>
 
     <button
       onclick="toggleTheme()"
       class="text-lg"
-      id="themeBtn">
+      id="themeBtn"
+    >
       🌙
     </button>
 
     <button
       onclick="logoutUser()"
       class="text-lg hidden"
-      id="logoutBtn">
+      id="logoutBtn"
+    >
       🚪
     </button>
 
@@ -537,437 +689,626 @@ body.light .hourCell{
 
 <!-- =========================================================
      MAIN
-     ========================================================= -->
+========================================================= -->
 
 <div class="flex flex-1 overflow-hidden">
 
 
-  <!-- SIDEBAR -->
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
 
-  <aside
-    id="sidebar"
-    class="hidden md:flex w-56 glass flex-col gap-1 p-2 text-sm"
-    dir="ltr">
+<aside
+  id="sidebar"
+  class="hidden md:flex w-56 glass flex-col gap-1 p-2 text-sm"
+  dir="ltr"
+>
 
-    <a class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
-      🗺️
-      <span data-i18n="carte">Carte</span>
-    </a>
-
-    <a
-      onclick="togglePanel('weatherPanel')"
-      class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
-      🌤️
-      <span data-i18n="meteo">Météo</span>
-    </a>
-
-    <a
-      onclick="openSpecies()"
-      class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
-      🐠
-      <span data-i18n="especes">Espèces</span>
-    </a>
-
-    <a
-      onclick="togglePanel('layersPanel')"
-      class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
-      📍
-      <span data-i18n="zones">Zones</span>
-    </a>
-
-    <a
-      onclick="togglePanel('forecastPanel')"
-      class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
-      📅
-      <span data-i18n="previsions">Prévisions</span>
-    </a>
-
-    <a
-      onclick="openFavs()"
-      class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
-      ⭐
-      <span data-i18n="favoris">Favoris</span>
-    </a>
-
-    <a
-      onclick="myLocation()"
-      class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">
-      📡
-      <span data-i18n="gps">GPS</span>
-    </a>
-
-    <p
-      id="userSlot"
-      class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer mt-auto">
-      👤
-      <span>...</span>
-    </p>
-
-    <p
-      id="slogan"
-      class="italic text-red-500 text-center text-xs p-3">
-      Plus qu'une carte...<br>
-      <b>votre allié en mer</b>
-    </p>
-
-  </aside>
+  <a
+    class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer"
+  >
+    🗺️
+    <span data-i18n="carte">Carte</span>
+  </a>
 
 
-  <!-- MAP -->
-
-  <main class="flex-1 relative">
-
-    <div id="map" class="w-full h-full"></div>
-
-
-    <!-- MOBILE BUTTONS -->
-
-    <button
-      onclick="togglePanel('weatherPanel')"
-      class="float-btn glass top-3 right-3 md:hidden">
-      🌬️
-    </button>
-
-    <button
-      onclick="myLocation()"
-      class="float-btn glass top-[5.5rem] right-3 md:hidden">
-      📍
-    </button>
-
-    <button
-      onclick="togglePanel('layersPanel')"
-      class="float-btn glass top-[9.8rem] right-3 md:hidden">
-      ⚙️
-    </button>
+  <a
+    onclick="togglePanel('weatherPanel')"
+    class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer"
+  >
+    🌤️
+    <span data-i18n="meteo">Météo</span>
+  </a>
 
 
-    <!-- =====================================================
-         WEATHER PANEL
-         ===================================================== -->
+  <a
+    onclick="openSpecies()"
+    class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer"
+  >
+    🐠
+    <span data-i18n="especes">Espèces</span>
+  </a>
+
+
+  <a
+    onclick="togglePanel('layersPanel')"
+    class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer"
+  >
+    📍
+    <span data-i18n="zones">Zones</span>
+  </a>
+
+
+  <a
+    onclick="togglePanel('forecastPanel')"
+    class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer"
+  >
+    📅
+    <span data-i18n="previsions">Prévisions</span>
+  </a>
+
+
+  <a
+    onclick="openFavs()"
+    class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer"
+  >
+    ⭐
+    <span data-i18n="favoris">Favoris</span>
+  </a>
+
+
+  <a
+    onclick="myLocation()"
+    class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer"
+  >
+    📡
+    <span data-i18n="gps">GPS</span>
+  </a>
+
+
+  <p
+    id="userSlot"
+    class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer mt-auto"
+  >
+    👤
+    <span>...</span>
+  </p>
+
+
+  <p
+    id="slogan"
+    class="italic text-red-500 text-center text-xs p-3"
+  >
+    Plus qu'une carte...<br>
+    <b>votre allié en mer</b>
+  </p>
+
+</aside>
+
+
+<!-- =========================================================
+     MAP
+========================================================= -->
+
+<main class="flex-1 relative">
+
+  <div id="map" class="w-full h-full"></div>
+
+
+  <!-- MAP STATUS -->
+
+  <div class="map-status">
 
     <div
-      id="weatherPanel"
-      class="hidden md:block absolute top-3 right-3 left-3 md:left-auto md:w-80 glass rounded-2xl p-3 z-[1000] max-h-[90%] overflow-y-auto">
+      id="mapStatus"
+      class="map-badge red"
+    >
+      ● LIVE
+    </div>
 
-      <div class="flex justify-between items-center mb-3">
+    <div
+      id="mapWindBadge"
+      class="map-badge"
+    >
+      🌬️ -- nd
+    </div>
 
-        <div class="flex justify-between text-center text-[10px] md:text-xs gap-1 flex-1">
+    <div
+      id="mapWaveBadge"
+      class="map-badge"
+    >
+      🌊 -- m
+    </div>
 
-          <button
-            onclick="setLayer('vent')"
-            id="btn-vent"
-            class="layer-btn bg-red-600 rounded-lg px-2 py-2 font-bold">
-            🌬️ Vent
-          </button>
+  </div>
 
-          <button
-            onclick="setLayer('vagues')"
-            id="btn-vagues"
-            class="layer-btn rounded-lg px-2 py-2">
-            🌊 Vagues
-          </button>
 
-          <button
-            onclick="setLayer('courants')"
-            id="btn-courants"
-            class="layer-btn rounded-lg px-2 py-2">
-            🧭 Courants
-          </button>
+  <!-- MOBILE BUTTONS -->
 
-          <button
-            onclick="setLayer('temp')"
-            id="btn-temp"
-            class="layer-btn rounded-lg px-2 py-2">
-            🌡️ Temp.
-          </button>
+  <button
+    onclick="togglePanel('weatherPanel')"
+    class="float-btn glass top-3 right-3 md:hidden"
+  >
+    🌬️
+  </button>
 
-        </div>
+
+  <button
+    onclick="myLocation()"
+    class="float-btn glass top-[5.5rem] right-3 md:hidden"
+  >
+    📍
+  </button>
+
+
+  <button
+    onclick="togglePanel('layersPanel')"
+    class="float-btn glass top-[9.8rem] right-3 md:hidden"
+  >
+    ⚙️
+  </button>
+
+
+  <!-- =======================================================
+       WEATHER PANEL
+  ======================================================== -->
+
+  <div
+    id="weatherPanel"
+    class="hidden absolute top-3 right-3 left-3 md:left-auto md:w-80 glass rounded-2xl p-3 z-[1000] max-h-[90%] overflow-y-auto"
+  >
+
+    <div class="flex justify-between items-center mb-3">
+
+      <div
+        class="flex justify-between text-center text-[10px] md:text-xs gap-1 flex-1"
+      >
 
         <button
-          onclick="togglePanel('weatherPanel')"
-          class="text-gray-400 ml-2 md:hidden">
-          ✕
+          onclick="setLayer('vent')"
+          id="btn-vent"
+          class="layer-btn bg-red-600 rounded-lg px-2 py-2 font-bold"
+        >
+          🌬️ Vent
+        </button>
+
+        <button
+          onclick="setLayer('vagues')"
+          id="btn-vagues"
+          class="layer-btn rounded-lg px-2 py-2"
+        >
+          🌊 Vagues
+        </button>
+
+        <button
+          onclick="setLayer('courants')"
+          id="btn-courants"
+          class="layer-btn rounded-lg px-2 py-2"
+        >
+          🧭 Courants
+        </button>
+
+        <button
+          onclick="setLayer('temp')"
+          id="btn-temp"
+          class="layer-btn rounded-lg px-2 py-2"
+        >
+          🌡️ Temp.
         </button>
 
       </div>
-
-
-      <p class="text-sm mb-1" id="windLabel">
-        🌬️ Vitesse du vent
-      </p>
-
-      <div class="h-2 rounded-full bg-gradient-to-r from-blue-500 via-yellow-400 to-red-600 mb-3"></div>
-
-
-      <div
-        id="liveData"
-        class="text-xs border-t border-white/10 pt-2">
-        <p class="text-gray-400">
-          ⏳ Chargement...
-        </p>
-      </div>
-
 
       <button
-        onclick="myLocation()"
-        class="w-full mt-2 bg-blue-600 rounded-full py-2 text-xs font-bold">
-        📍 أين أنا؟ / Où suis-je ?
+        onclick="togglePanel('weatherPanel')"
+        class="text-gray-400 ml-2 md:hidden"
+      >
+        ✕
       </button>
 
-
-      <div
-        id="sunBox"
-        class="mt-2 text-xs glass rounded-xl p-2 hidden">
-      </div>
-
-
-      <div class="mt-3 border-t border-white/10 pt-3">
-
-        <div class="flex items-center gap-3">
-
-          <div
-            class="compass"
-            id="compass">
-
-            <span
-              class="dir"
-              style="top:4px;left:50%;transform:translateX(-50%)">
-              N
-            </span>
-
-            <span
-              class="dir"
-              style="bottom:4px;left:50%;transform:translateX(-50%)">
-              S
-            </span>
-
-            <span
-              class="dir"
-              style="left:6px;top:50%;transform:translateY(-50%)">
-              W
-            </span>
-
-            <span
-              class="dir"
-              style="right:6px;top:50%;transform:translateY(-50%)">
-              E
-            </span>
-
-            <div
-              class="arrow"
-              id="windArrow"
-              style="transform:translate(-50%,-100%) rotate(0deg)">
-            </div>
-
-            <div class="center"></div>
-
-          </div>
-
-          <div
-            class="text-xs flex-1"
-            id="compassInfo">
-            ⏳ ...
-          </div>
-
-        </div>
-
-
-        <p class="font-bold mt-3 mb-1 text-xs">
-          ⏰
-          <span id="hourlyTitle">
-            Prévisions heure par heure
-          </span>
-        </p>
-
-        <div
-          class="hourRow"
-          id="hourlyBox">
-        </div>
-
-      </div>
-
     </div>
 
 
-    <!-- =====================================================
-         LAYERS PANEL
-         ===================================================== -->
+    <p
+      class="text-sm mb-1"
+      id="windLabel"
+    >
+      🌬️ Vitesse du vent
+    </p>
+
 
     <div
-      id="layersPanel"
-      class="hidden md:block absolute top-[16.5rem] right-3 w-64 md:w-80 glass rounded-2xl p-3 z-[1000] text-sm space-y-2">
+      class="h-2 rounded-full bg-gradient-to-r from-blue-500 via-yellow-400 to-red-600 mb-3"
+    ></div>
 
-      <div class="flex justify-between items-center mb-1">
-
-        <p
-          class="font-bold"
-          data-i18n="couches">
-          Couches
-        </p>
-
-        <button
-          onclick="togglePanel('layersPanel')"
-          class="text-gray-400 md:hidden">
-          ✕
-        </button>
-
-      </div>
-
-
-      <div class="flex justify-between items-center">
-
-        <span>
-          🗿
-          <span data-i18n="fond">
-            Fond marin
-          </span>
-        </span>
-
-        <div
-          class="switch"
-          onclick="this.classList.toggle('on');toggleOcean()">
-        </div>
-
-      </div>
-
-
-      <div class="flex justify-between items-center">
-
-        <span>
-          🎣
-          <span data-i18n="zonesP">
-            Zones de pêche
-          </span>
-        </span>
-
-        <div
-          class="switch on"
-          onclick="this.classList.toggle('on');toggleZones()">
-        </div>
-
-      </div>
-
-
-      <div class="flex justify-between items-center">
-
-        <span>
-          🌊
-          <span data-i18n="waves">
-            Vagues
-          </span>
-        </span>
-
-        <div
-          class="switch"
-          onclick="this.classList.toggle('on');toggleWaves()">
-        </div>
-
-      </div>
-
-
-      <div class="flex justify-between items-center">
-
-        <span>
-          🌿
-          <span data-i18n="habitat">
-            Habitat
-          </span>
-        </span>
-
-        <div
-          class="switch on">
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         FORECAST
-         ===================================================== -->
 
     <div
-      id="forecastPanel"
-      class="absolute bottom-3 right-3 left-3 md:left-auto md:w-[430px] glass rounded-2xl p-3 z-[1000] hidden">
+      id="liveData"
+      class="text-xs border-t border-white/10 pt-2"
+    >
+      <p class="text-gray-400">
+        ⏳ Chargement...
+      </p>
+    </div>
 
-      <div class="flex justify-between items-center mb-2">
 
-        <p class="font-bold">
-          📅
-          <span data-i18n="previsions">
-            Prévisions 7 jours
+    <button
+      onclick="myLocation()"
+      class="w-full mt-2 bg-blue-600 rounded-full py-2 text-xs font-bold"
+    >
+      📍 أين أنا؟ / Où suis-je ?
+    </button>
+
+
+    <div
+      id="sunBox"
+      class="mt-2 text-xs glass rounded-xl p-2 hidden"
+    ></div>
+
+
+    <div class="mt-3 border-t border-white/10 pt-3">
+
+      <div class="flex items-center gap-3">
+
+        <div
+          class="compass"
+          id="compass"
+        >
+
+          <span
+            class="dir"
+            style="top:4px;left:50%;transform:translateX(-50%)"
+          >
+            N
           </span>
-        </p>
 
-        <button
-          onclick="togglePanel('forecastPanel')"
-          class="text-gray-400">
-          ✕
-        </button>
+          <span
+            class="dir"
+            style="bottom:4px;left:50%;transform:translateX(-50%)"
+          >
+            S
+          </span>
+
+          <span
+            class="dir"
+            style="left:6px;top:50%;transform:translateY(-50%)"
+          >
+            W
+          </span>
+
+          <span
+            class="dir"
+            style="right:6px;top:50%;transform:translateY(-50%)"
+          >
+            E
+          </span>
+
+          <div
+            class="arrow"
+            id="windArrow"
+            style="transform:translate(-50%,-100%) rotate(0deg)"
+          ></div>
+
+          <div class="center"></div>
+
+        </div>
+
+
+        <div
+          class="text-xs flex-1"
+          id="compassInfo"
+        >
+          ⏳ ...
+        </div>
 
       </div>
+
+
+      <p class="font-bold mt-3 mb-1 text-xs">
+        ⏰
+        <span id="hourlyTitle">
+          Prévisions heure par heure
+        </span>
+      </p>
+
 
       <div
-        id="forecastContent"
-        class="grid grid-cols-7 gap-1 text-center text-xs">
-      </div>
+        class="hourRow"
+        id="hourlyBox"
+      ></div>
 
     </div>
 
-  </main>
+  </div>
+
+
+  <!-- =======================================================
+       LAYERS PANEL
+  ======================================================== -->
+
+  <div
+    id="layersPanel"
+    class="hidden absolute top-[16.5rem] right-3 w-64 md:w-80 glass rounded-2xl p-3 z-[1000] text-sm space-y-2"
+  >
+
+    <div class="flex justify-between items-center mb-1">
+
+      <p
+        class="font-bold"
+        data-i18n="couches"
+      >
+        Couches
+      </p>
+
+      <button
+        onclick="togglePanel('layersPanel')"
+        class="text-gray-400 md:hidden"
+      >
+        ✕
+      </button>
+
+    </div>
+
+
+    <!-- BASE MAP -->
+
+    <div
+      class="flex justify-between items-center"
+    >
+
+      <span>
+        🗺️
+        <span data-i18n="fondCarte">
+          Fond carte
+        </span>
+      </span>
+
+      <select
+        onchange="changeBaseMap(this.value)"
+        class="bg-slate-800 rounded-lg px-2 py-1 text-xs"
+      >
+
+        <option value="satellite">
+          Satellite
+        </option>
+
+        <option value="dark">
+          Dark
+        </option>
+
+        <option value="ocean">
+          Ocean
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- OCEAN -->
+
+    <div class="flex justify-between items-center">
+
+      <span>
+        🗿
+        <span data-i18n="fond">
+          Fond marin
+        </span>
+      </span>
+
+      <div
+        id="oceanSwitch"
+        class="switch"
+        onclick="this.classList.toggle('on');toggleOcean()"
+      ></div>
+
+    </div>
+
+
+    <!-- FISHING -->
+
+    <div class="flex justify-between items-center">
+
+      <span>
+        🎣
+        <span data-i18n="zonesP">
+          Zones de pêche
+        </span>
+      </span>
+
+      <div
+        class="switch on"
+        onclick="this.classList.toggle('on');toggleZones()"
+      ></div>
+
+    </div>
+
+
+    <!-- WAVES -->
+
+    <div class="flex justify-between items-center">
+
+      <span>
+        🌊
+        <span data-i18n="waves">
+          Vagues
+        </span>
+      </span>
+
+      <div
+        id="wavesSwitch"
+        class="switch"
+        onclick="this.classList.toggle('on');toggleWaves()"
+      ></div>
+
+    </div>
+
+
+    <!-- AUTO WEATHER -->
+
+    <div class="flex justify-between items-center">
+
+      <span>
+        ⚡
+        <span data-i18n="auto">
+          Actualisation auto
+        </span>
+      </span>
+
+      <div
+        id="autoSwitch"
+        class="switch on"
+        onclick="this.classList.toggle('on');toggleAutoWeather()"
+      ></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       WAVE LEGEND
+  ======================================================== -->
+
+  <div
+    id="waveLegend"
+    class="wave-legend hidden"
+  >
+
+    <b>🌊 Hauteur des vagues</b>
+
+    <div class="legend-row">
+      <span
+        class="legend-dot"
+        style="background:#16a34a"
+      ></span>
+      <span>&lt; 0.5 m</span>
+    </div>
+
+    <div class="legend-row">
+      <span
+        class="legend-dot"
+        style="background:#eab308"
+      ></span>
+      <span>0.5 - 1 m</span>
+    </div>
+
+    <div class="legend-row">
+      <span
+        class="legend-dot"
+        style="background:#f97316"
+      ></span>
+      <span>1 - 1.5 m</span>
+    </div>
+
+    <div class="legend-row">
+      <span
+        class="legend-dot"
+        style="background:#dc2626"
+      ></span>
+      <span>&gt; 1.5 m</span>
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       FORECAST
+  ======================================================== -->
+
+  <div
+    id="forecastPanel"
+    class="absolute bottom-3 right-3 left-3 md:left-auto md:w-[430px] glass rounded-2xl p-3 z-[1000] hidden"
+  >
+
+    <div class="flex justify-between items-center mb-2">
+
+      <p class="font-bold">
+        📅
+        <span data-i18n="previsions">
+          Prévisions 7 jours
+        </span>
+      </p>
+
+      <button
+        onclick="togglePanel('forecastPanel')"
+        class="text-gray-400"
+      >
+        ✕
+      </button>
+
+    </div>
+
+    <div
+      id="forecastContent"
+      class="grid grid-cols-7 gap-1 text-center text-xs"
+    ></div>
+
+  </div>
+
+</main>
 
 </div>
 
 
 <!-- =========================================================
      FOOTER
-     ========================================================= -->
+========================================================= -->
 
 <footer
-  class="glass hidden md:flex gap-3 px-4 py-2 z-20 text-sm">
+  class="glass hidden md:flex gap-3 px-4 py-2 z-20 text-sm"
+>
 
   <div class="glass flex-1 rounded-xl p-2">
     ⛅
     <span data-i18n="meteoAct">
       Météo actuelle
     </span>
+
     <b
       id="tempVal"
-      class="block text-lg">
+      class="block text-lg"
+    >
       --°C
     </b>
   </div>
+
 
   <div class="glass flex-1 rounded-xl p-2">
     🌊
     <span data-i18n="vaguesF">
       Vagues
     </span>
+
     <b
       id="waveVal"
-      class="block text-lg">
+      class="block text-lg"
+    >
       -- m
     </b>
   </div>
+
 
   <div class="glass flex-1 rounded-xl p-2">
     🌬️
     <span data-i18n="ventF">
       Vent
     </span>
+
     <b
       id="windVal"
-      class="block text-lg">
+      class="block text-lg"
+    >
       -- nd
     </b>
   </div>
+
 
   <div class="glass flex-1 rounded-xl p-2">
     🎣
     <span data-i18n="meilleures">
       Meilleures zones
     </span>
+
     <b class="block text-xs">
       Daurade • Loup • Sar
     </b>
@@ -978,50 +1319,60 @@ body.light .hourCell{
 
 <!-- =========================================================
      MOBILE NAV
-     ========================================================= -->
+========================================================= -->
 
 <nav
-  class="md:hidden glass fixed bottom-0 inset-x-0 z-[3000] flex justify-around py-2 text-xs">
+  class="md:hidden glass fixed bottom-0 inset-x-0 z-[3000] flex justify-around py-2 text-xs"
+>
 
   <button
     onclick="togglePanel('weatherPanel')"
-    class="flex flex-col items-center px-2">
+    class="flex flex-col items-center px-2"
+  >
     🌬️
     <span data-i18n="meteo">
       Météo
     </span>
   </button>
 
+
   <button
     onclick="openSpecies()"
-    class="flex flex-col items-center px-2">
+    class="flex flex-col items-center px-2"
+  >
     🐠
     <span data-i18n="especes">
       Espèces
     </span>
   </button>
 
+
   <button
     onclick="togglePanel('forecastPanel')"
-    class="flex flex-col items-center px-2">
+    class="flex flex-col items-center px-2"
+  >
     📅
-    <span data-i18n="previsions">
+    <span data-i18n="previsionsCourtes">
       Prév.
     </span>
   </button>
 
+
   <button
     onclick="openFavs()"
-    class="flex flex-col items-center px-2">
+    class="flex flex-col items-center px-2"
+  >
     ⭐
     <span data-i18n="favoris">
       Favoris
     </span>
   </button>
 
+
   <button
     onclick="logoutUser()"
-    class="flex flex-col items-center px-2">
+    class="flex flex-col items-center px-2"
+  >
     🚪
     <span>
       Compte
@@ -1033,14 +1384,16 @@ body.light .hourCell{
 
 <!-- =========================================================
      SPECIES MODAL
-     ========================================================= -->
+========================================================= -->
 
 <div
   id="speciesModal"
-  class="fixed inset-0 bg-black/70 z-[3000] hidden items-center justify-center p-3">
+  class="fixed inset-0 bg-black/70 z-[3000] hidden items-center justify-center p-3"
+>
 
   <div
-    class="glass rounded-2xl w-full max-w-[600px] max-h-[85vh] overflow-y-auto p-4">
+    class="glass rounded-2xl w-full max-w-[600px] max-h-[85vh] overflow-y-auto p-4"
+  >
 
     <div class="flex justify-between items-center mb-3">
 
@@ -1053,7 +1406,8 @@ body.light .hourCell{
 
       <button
         onclick="closeModal('speciesModal')"
-        class="text-gray-400 text-xl">
+        class="text-gray-400 text-xl"
+      >
         ✕
       </button>
 
@@ -1065,13 +1419,14 @@ body.light .hourCell{
       oninput="renderSpecies(this.value)"
       type="text"
       placeholder="🔍 Filtrer..."
-      class="w-full bg-slate-800/80 rounded-full px-4 py-2 text-sm outline-none mb-3">
+      class="w-full bg-slate-800/80 rounded-full px-4 py-2 text-sm outline-none mb-3"
+    >
 
 
     <div
       id="speciesList"
-      class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-    </div>
+      class="grid grid-cols-1 sm:grid-cols-2 gap-2"
+    ></div>
 
   </div>
 
@@ -1079,15 +1434,17 @@ body.light .hourCell{
 
 
 <!-- =========================================================
-     FAVORITES MODAL
-     ========================================================= -->
+     FAVORITES
+========================================================= -->
 
 <div
   id="favModal"
-  class="fixed inset-0 bg-black/70 z-[3000] hidden items-center justify-center p-3">
+  class="fixed inset-0 bg-black/70 z-[3000] hidden items-center justify-center p-3"
+>
 
   <div
-    class="glass rounded-2xl w-full max-w-sm p-4">
+    class="glass rounded-2xl w-full max-w-sm p-4"
+  >
 
     <div class="flex justify-between items-center mb-3">
 
@@ -1100,16 +1457,18 @@ body.light .hourCell{
 
       <button
         onclick="closeModal('favModal')"
-        class="text-gray-400 text-xl">
+        class="text-gray-400 text-xl"
+      >
         ✕
       </button>
 
     </div>
 
+
     <div
       id="favList"
-      class="space-y-2 text-sm">
-    </div>
+      class="space-y-2 text-sm"
+    ></div>
 
   </div>
 
@@ -1120,7 +1479,7 @@ body.light .hourCell{
 
 /* =========================================================
    FIREBASE
-   ========================================================= */
+========================================================= */
 
 const firebaseConfig={
   apiKey:"AIzaSyCKLRKGwp5XBtEmwjMdrmDWg7-9S29ixgA",
@@ -1136,11 +1495,17 @@ firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth();
 var db=firebase.firestore();
 
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
+
 var lang='fr';
 var isDark=true;
 
 var zoneMarkers=[];
 var waveGroup=null;
+var waveLoading=false;
 
 var currentLat=36.8;
 var currentLon=11.5;
@@ -1148,10 +1513,16 @@ var currentLon=11.5;
 var currentUser=null;
 var favs=[];
 
+var clickMarker=null;
+var userMarker=null;
+
+var autoWeather=true;
+var weatherTimer=null;
+
 
 /* =========================================================
    AUTH
-   ========================================================= */
+========================================================= */
 
 function showAuthMsg(t,col){
 
@@ -1159,8 +1530,8 @@ function showAuthMsg(t,col){
 
   err.textContent=t;
   err.classList.remove('hidden');
-  err.style.color=col||'#ef4444';
 
+  err.style.color=col||'#ef4444';
 }
 
 
@@ -1169,55 +1540,65 @@ function authMsgFr(e){
   var c=e.code||'';
 
   if(c.indexOf('email-already')>-1)
-    return'⚠️ البريد مسجل — ادخل مباشرة / Déjà inscrit';
+    return '⚠️ البريد مسجل — ادخل مباشرة / Déjà inscrit';
 
   if(c.indexOf('invalid-email')>-1)
-    return'⚠️ بريد غير صالح / E-mail invalide';
+    return '⚠️ بريد غير صالح / E-mail invalide';
 
   if(c.indexOf('weak-password')>-1)
-    return'⚠️ كلمة السر 6 أحرف على الأقل / 6 caractères min';
+    return '⚠️ كلمة السر 6 أحرف على الأقل / 6 caractères min';
 
   if(c.indexOf('user-not-found')>-1)
-    return'⚠️ بريد غير مسجل / Introuvable';
+    return '⚠️ بريد غير مسجل / Introuvable';
 
-  if(c.indexOf('wrong-password')>-1 ||
-     c.indexOf('invalid-credential')>-1)
-    return'⚠️ كلمة السر خاطئة / Mot de passe faux';
+  if(
+    c.indexOf('wrong-password')>-1 ||
+    c.indexOf('invalid-credential')>-1
+  )
+    return '⚠️ كلمة السر خاطئة / Mot de passe faux';
 
   if(c.indexOf('too-many-requests')>-1)
-    return'⚠️ محاولات كثيرة، انتظر / Trop de tentatives';
+    return '⚠️ محاولات كثيرة، انتظر / Trop de tentatives';
 
-  return'⚠️ '+e.message;
+  return '⚠️ '+e.message;
 }
 
 
 function authRegister(){
 
-  auth.createUserWithEmailAndPassword(
-    document.getElementById('authEmail').value.trim(),
-    document.getElementById('authPass').value
-  ).catch(function(e){
-    showAuthMsg(authMsgFr(e))
-  });
+  auth
+    .createUserWithEmailAndPassword(
+      document.getElementById('authEmail').value.trim(),
+      document.getElementById('authPass').value
+    )
+    .catch(function(e){
+      showAuthMsg(authMsgFr(e));
+    });
 
 }
 
 
 function authEnter(){
 
-  auth.signInWithEmailAndPassword(
-    document.getElementById('authEmail').value.trim(),
-    document.getElementById('authPass').value
-  ).catch(function(e){
-    showAuthMsg(authMsgFr(e))
-  });
+  auth
+    .signInWithEmailAndPassword(
+      document.getElementById('authEmail').value.trim(),
+      document.getElementById('authPass').value
+    )
+    .catch(function(e){
+      showAuthMsg(authMsgFr(e));
+    });
 
 }
 
 
 function resetPass(){
 
-  var e=document.getElementById('authEmail').value.trim();
+  var e=
+    document
+      .getElementById('authEmail')
+      .value
+      .trim();
 
   if(!e){
 
@@ -1228,7 +1609,8 @@ function resetPass(){
     return;
   }
 
-  auth.sendPasswordResetEmail(e)
+  auth
+    .sendPasswordResetEmail(e)
     .then(function(){
 
       showAuthMsg(
@@ -1259,15 +1641,25 @@ auth.onAuthStateChanged(function(u){
 
     currentUser=u;
 
-    document.getElementById('authScreen').style.display='none';
+    document
+      .getElementById('authScreen')
+      .style.display='none';
 
-    document.getElementById('logoutBtn')
-      .classList.remove('hidden');
+    document
+      .getElementById('logoutBtn')
+      .classList
+      .remove('hidden');
 
-    document.getElementById('userSlot').innerHTML=
-      '👤 <b>'+u.email.split('@')[0]+'</b>';
+    document
+      .getElementById('userSlot')
+      .innerHTML=
+        '👤 <b>'+
+        u.email.split('@')[0]+
+        '</b>';
 
-    map.invalidateSize();
+    setTimeout(function(){
+      map.invalidateSize();
+    },300);
 
     loadFavs();
 
@@ -1275,10 +1667,14 @@ auth.onAuthStateChanged(function(u){
 
     currentUser=null;
 
-    document.getElementById('authScreen').style.display='flex';
+    document
+      .getElementById('authScreen')
+      .style.display='flex';
 
-    document.getElementById('logoutBtn')
-      .classList.add('hidden');
+    document
+      .getElementById('logoutBtn')
+      .classList
+      .add('hidden');
 
   }
 
@@ -1287,59 +1683,115 @@ auth.onAuthStateChanged(function(u){
 
 /* =========================================================
    MAP
-   ========================================================= */
+========================================================= */
 
-var map=L.map('map',{
-  zoomControl:false
-}).setView([36.8,11.5],7);
-
-
-var satLayer=L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  {
-    attribution:'Esri'
-  }
-).addTo(map);
-
-
-var darkLayer=L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  {
-    attribution:'CARTO'
-  }
-);
+var map=
+  L.map(
+    'map',
+    {
+      zoomControl:false,
+      preferCanvas:true
+    }
+  )
+  .setView(
+    [36.8,11.5],
+    7
+  );
 
 
-var oceanLayer=L.tileLayer(
-  'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
-  {
-    attribution:'Esri Ocean'
-  }
-);
+L.control.zoom({
+  position:'bottomright'
+}).addTo(map);
 
 
 L.control.scale({
-  position:'bottomleft'
+  position:'bottomleft',
+  imperial:false
 }).addTo(map);
 
 
 /* =========================================================
-   OCEAN
-   ========================================================= */
+   BASE MAPS
+========================================================= */
 
-function toggleOcean(){
+var satLayer=
+  L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {
+      attribution:'Esri World Imagery',
+      maxZoom:19
+    }
+  );
+
+
+var darkLayer=
+  L.tileLayer(
+    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    {
+      attribution:'CARTO',
+      maxZoom:19
+    }
+  );
+
+
+var oceanLayer=
+  L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
+    {
+      attribution:'Esri Ocean',
+      maxZoom:12
+    }
+  );
+
+
+satLayer.addTo(map);
+
+
+function changeBaseMap(mode){
+
+  if(map.hasLayer(satLayer))
+    map.removeLayer(satLayer);
+
+  if(map.hasLayer(darkLayer))
+    map.removeLayer(darkLayer);
 
   if(map.hasLayer(oceanLayer))
     map.removeLayer(oceanLayer);
-  else
-    map.addLayer(oceanLayer);
+
+  if(mode==='satellite')
+    satLayer.addTo(map);
+
+  else if(mode==='dark')
+    darkLayer.addTo(map);
+
+  else if(mode==='ocean')
+    oceanLayer.addTo(map);
+
+}
+
+
+/* =========================================================
+   OCEAN LAYER
+========================================================= */
+
+function toggleOcean(){
+
+  if(map.hasLayer(oceanLayer)){
+
+    map.removeLayer(oceanLayer);
+
+  }else{
+
+    oceanLayer.addTo(map);
+
+  }
 
 }
 
 
 /* =========================================================
    SPECIES
-   ========================================================= */
+========================================================= */
 
 var species=[
 
@@ -1394,7 +1846,7 @@ var species=[
   },
 
   {
-    fr:"Sardinne",
+    fr:"Sardine",
     ar:"السردين",
     icon:"🐟",
     season:"Nov → Avr",
@@ -1433,78 +1885,115 @@ var regNames={
 };
 
 
-var fishIcon=L.divIcon({
-  className:'',
-  html:'<div class="fish-pin"><span>🐟</span></div>',
-  iconSize:[34,34]
-});
+var fishIcon=
+  L.divIcon({
+    className:'',
+    html:
+      '<div class="fish-pin">'+
+      '<span>🐟</span>'+
+      '</div>',
+    iconSize:[38,38],
+    iconAnchor:[19,38],
+    popupAnchor:[0,-35]
+  });
 
 
 /* =========================================================
    FISHING ZONES
-   ========================================================= */
+========================================================= */
 
-[
+var fishingPoints=[
+
   [37.10,10.40,'n'],
   [36.60,11.10,'n'],
   [36.20,11.60,'c'],
   [35.70,11.30,'c'],
   [35.10,11.40,'c'],
   [34.50,11.20,'s']
-].forEach(function(p){
 
-  var m=L.marker(
-    [p[0],p[1]],
-    {
-      icon:fishIcon
-    }
-  ).addTo(map);
+];
 
 
-  m.bindPopup(function(){
+fishingPoints.forEach(function(p){
 
-    var reg=p[2];
-
-    var list=species.filter(function(s){
-      return s.regions.indexOf(reg)>-1;
-    });
-
-
-    var title=
-      lang==='ar'
-      ?regNames[reg][1]
-      :regNames[reg][0];
+  var m=
+    L.marker(
+      [p[0],p[1]],
+      {
+        icon:fishIcon
+      }
+    )
+    .addTo(map);
 
 
-    var h=
-      '<div class="zone-card">'+
-      '<div class="zone-header">🎣 '+title+'</div>'+
-      '<div class="zone-body">';
+  m.bindPopup(
+    function(){
+
+      var reg=p[2];
+
+      var list=
+        species.filter(function(s){
+          return s.regions.indexOf(reg)>-1;
+        });
 
 
-    list.forEach(function(s){
+      var html=
+        '<div class="redline-card">'+
 
-      h+=
-        '<div class="zone-fish">'+
-        s.icon+' <b>'+
-        (lang==='ar'?s.ar:s.fr)+
-        '</b>'+
-        '<br>'+
-        '<span style="color:#64748b;font-size:10px">'+
-        '📅 '+s.season+
-        '</span>'+
+        '<div class="redline-header">'+
+          '<div class="redline-title">'+
+            '🎣 '+
+            (lang==='ar'
+              ?regNames[reg][1]
+              :regNames[reg][0])+
+          '</div>'+
+
+          '<div class="redline-subtitle">'+
+            (lang==='ar'
+              ?'منطقة صيد مقترحة'
+              :'Zone de pêche recommandée')+
+          '</div>'+
+        '</div>'+
+
+        '<div class="redline-body">';
+
+
+      list.forEach(function(s){
+
+        html+=
+          '<div class="redline-row">'+
+
+            '<span class="redline-icon">'+
+              s.icon+
+            '</span>'+
+
+            '<span>'+
+              (lang==='ar'
+                ?s.ar
+                :s.fr)+
+            '</span>'+
+
+            '<span class="redline-value">'+
+              s.season+
+            '</span>'+
+
+          '</div>';
+
+      });
+
+
+      html+=
+        '</div>'+
         '</div>';
 
-    });
 
+      return html;
 
-    h+='</div></div>';
-
-    return h;
-
-  },{
-    className:'zone-popup'
-  });
+    },
+    {
+      className:'redline-popup'
+    }
+  );
 
 
   zoneMarkers.push(m);
@@ -1518,6 +2007,7 @@ function toggleZones(){
 
     if(map.hasLayer(m))
       map.removeLayer(m);
+
     else
       map.addLayer(m);
 
@@ -1528,9 +2018,11 @@ function toggleZones(){
 
 /* =========================================================
    WAVES
-   ========================================================= */
+   FIXED VERSION
+========================================================= */
 
 var wavePts=[
+
   [37.3,9.9],
   [37.0,10.5],
   [36.7,11.0],
@@ -1541,119 +2033,485 @@ var wavePts=[
   [34.7,11.1],
   [34.1,11.0],
   [33.5,11.0]
+
 ];
 
 
-function toggleWaves(){
+function waveColorClass(h){
 
-  if(
-    waveGroup &&
-    map.hasLayer(waveGroup)
-  ){
+  if(h<0.5)
+    return 'wave-low';
+
+  if(h<1)
+    return 'wave-medium';
+
+  if(h<1.5)
+    return 'wave-high';
+
+  return 'wave-danger';
+
+}
+
+
+function waveColor(h){
+
+  if(h<0.5)
+    return '#16a34a';
+
+  if(h<1)
+    return '#eab308';
+
+  if(h<1.5)
+    return '#f97316';
+
+  return '#dc2626';
+
+}
+
+
+/*
+  IMPORTANT:
+
+  بدل إرسال 10 إحداثيات في طلب واحد،
+  نرسل طلباً منفصلاً لكل نقطة.
+
+  هذا يجعل طبقة الأمواج أكثر استقراراً.
+*/
+
+
+async function getWavePoint(lat,lon){
+
+  var url=
+    'https://marine-api.open-meteo.com/v1/marine'+
+    '?latitude='+lat+
+    '&longitude='+lon+
+    '&current=wave_height,wave_direction,wave_period'+
+    '&timezone=auto';
+
+
+  var response=
+    await fetch(
+      url,
+      {
+        cache:'no-store'
+      }
+    );
+
+
+  if(!response.ok)
+    throw new Error('Wave API '+response.status);
+
+
+  return await response.json();
+
+}
+
+
+async function toggleWaves(){
+
+  /*
+    إذا كانت الطبقة موجودة نحذفها.
+  */
+
+  if(waveGroup && map.hasLayer(waveGroup)){
 
     map.removeLayer(waveGroup);
-    waveGroup=null;
+
+    document
+      .getElementById('waveLegend')
+      .classList
+      .add('hidden');
 
     return;
   }
 
 
-  fetch(
-    'https://api.open-meteo.com/v1/marine?latitude=37.3,37,36.7,36.4,36,35.6,35.2,34.7,34.1,33.5&longitude=9.9,10.5,11,11.4,11.5,11.3,11.2,11.1,11,11&current=wave_height'
-  )
-  .then(function(r){
-    return r.json()
-  })
-  .then(function(res){
+  /*
+    منع تشغيل طلبين في نفس الوقت.
+  */
 
-    var arr=
-      Array.isArray(res)
-      ?res
-      :[res];
+  if(waveLoading)
+    return;
 
 
-    waveGroup=L.layerGroup(
-
-      arr.map(function(d,i){
-
-        var h=
-          (d.current &&
-           d.current.wave_height) || 0;
+  waveLoading=true;
 
 
-        var col=
-          h<0.5
-          ?'#22c55e'
-          :h<1
-          ?'#eab308'
-          :h<1.5
-          ?'#f97316'
-          :'#dc2626';
+  var legend=
+    document.getElementById('waveLegend');
+
+  legend.classList.remove('hidden');
 
 
-        return L.circleMarker(
-          wavePts[i],
-          {
-            radius:16,
-            color:col,
-            fillColor:col,
-            fillOpacity:.45,
-            weight:1
-          }
-        ).bindPopup(
-          '🌊 '+h.toFixed(2)+' m'
+  /*
+    LayerGroup جديد.
+  */
+
+  var group=
+    L.layerGroup();
+
+
+  waveGroup=group;
+
+
+  /*
+    Loading popup marker
+  */
+
+  var loadingMarker=
+    L.marker(
+      [36.5,11.3],
+      {
+        icon:
+          L.divIcon({
+            className:'',
+            html:
+              '<div class="wave-marker" '+
+              'style="background:#334155">'+
+              '⏳'+
+              '</div>',
+            iconSize:[34,34],
+            iconAnchor:[17,17]
+          })
+      }
+    )
+    .bindPopup(
+      '<div class="redline-card">'+
+        '<div class="redline-loading">'+
+          '⏳ Chargement des vagues...'+
+        '</div>'+
+      '</div>',
+      {
+        className:'redline-popup'
+      }
+    )
+    .addTo(group);
+
+
+  group.addTo(map);
+
+
+  try{
+
+    /*
+      طلبات متوازية.
+    */
+
+    var requests=
+      wavePts.map(function(p){
+
+        return getWavePoint(
+          p[0],
+          p[1]
         );
 
+      });
+
+
+    var results=
+      await Promise.all(
+        requests.map(function(promise){
+
+          return promise.catch(function(){
+
+            return null;
+
+          });
+
+        })
+      );
+
+
+    /*
+      إزالة loading.
+    */
+
+    group.removeLayer(loadingMarker);
+
+
+    var validCount=0;
+
+
+    results.forEach(function(d,i){
+
+      if(
+        !d ||
+        !d.current
+      )
+        return;
+
+
+      var h=
+        Number(d.current.wave_height);
+
+
+      if(!isFinite(h))
+        return;
+
+
+      validCount++;
+
+
+      var direction=
+        Number(
+          d.current.wave_direction||0
+        );
+
+
+      var period=
+        Number(
+          d.current.wave_period||0
+        );
+
+
+      var cls=
+        waveColorClass(h);
+
+
+      var color=
+        waveColor(h);
+
+
+      /*
+        Marker جميل.
+      */
+
+      var icon=
+        L.divIcon({
+          className:'',
+          html:
+            '<div class="wave-marker '+cls+'">'+
+              h.toFixed(1)+
+              'm'+
+            '</div>',
+          iconSize:[34,34],
+          iconAnchor:[17,17]
+        });
+
+
+      var marker=
+        L.marker(
+          wavePts[i],
+          {
+            icon:icon
+          }
+        );
+
+
+      var safety=
+        h<0.5
+          ?'✅ ظروف هادئة'
+          :h<1
+            ?'🟢 مناسبة للصيد'
+            :h<1.5
+              ?'⚠️ أمواج متوسطة'
+              :'🔴 أمواج قوية';
+
+
+      var popup=
+        '<div class="redline-card">'+
+
+          '<div class="redline-header">'+
+
+            '<div class="redline-title">'+
+              '🌊 حالة البحر'+
+            '</div>'+
+
+            '<div class="redline-subtitle">'+
+              'Red Line Marine Data'+
+            '</div>'+
+
+          '</div>'+
+
+          '<div class="redline-body">'+
+
+            '<div class="redline-row">'+
+              '<span class="redline-icon">🌊</span>'+
+              '<span class="redline-label">Hauteur</span>'+
+              '<span class="redline-value">'+
+                h.toFixed(2)+
+                ' m'+
+              '</span>'+
+            '</div>'+
+
+            '<div class="redline-row">'+
+              '<span class="redline-icon">🧭</span>'+
+              '<span class="redline-label">Direction</span>'+
+              '<span class="redline-value">'+
+                direction.toFixed(0)+
+                '°'+
+              '</span>'+
+            '</div>'+
+
+            '<div class="redline-row">'+
+              '<span class="redline-icon">⏱️</span>'+
+              '<span class="redline-label">Période</span>'+
+              '<span class="redline-value">'+
+                (
+                  isFinite(period)
+                    ?period.toFixed(1)
+                    :'--'
+                )+
+                ' s'+
+              '</span>'+
+            '</div>'+
+
+            (
+              h<1.5
+                ?
+                '<div class="redline-safe">'+
+                  safety+
+                '</div>'
+                :
+                '<div class="redline-danger">'+
+                  safety+
+                '</div>'
+            )+
+
+          '</div>'+
+
+        '</div>';
+
+
+      marker.bindPopup(
+        popup,
+        {
+          className:'redline-popup'
+        }
+      );
+
+
+      marker.addTo(group);
+
+    });
+
+
+    if(validCount===0){
+
+      group.removeLayer(loadingMarker);
+
+      L.popup({
+        className:'redline-popup'
       })
+      .setLatLng(
+        map.getCenter()
+      )
+      .setContent(
+        '<div class="redline-card">'+
+          '<div class="redline-loading">'+
+            '⚠️ Impossible de récupérer les vagues.'+
+            '<br><br>'+
+            'Vérifie ta connexion Internet.'+
+          '</div>'+
+        '</div>'
+      )
+      .openOn(map);
 
-    ).addTo(map);
+    }
 
-  })
-  .catch(function(e){
+  }catch(e){
 
-    console.log(e);
+    console.log(
+      'Wave error:',
+      e
+    );
 
-  });
+
+    if(waveGroup){
+
+      map.removeLayer(
+        waveGroup
+      );
+
+      waveGroup=null;
+
+    }
+
+
+    legend.classList.add('hidden');
+
+
+    L.popup({
+      className:'redline-popup'
+    })
+    .setLatLng(
+      map.getCenter()
+    )
+    .setContent(
+      '<div class="redline-card">'+
+        '<div class="redline-loading">'+
+          '⚠️ Erreur lors du chargement des vagues'+
+          '<br><br>'+
+          'Réessaie dans quelques secondes.'+
+        '</div>'+
+      '</div>'
+    )
+    .openOn(map);
+
+  }
+
+
+  waveLoading=false;
 
 }
 
 
 /* =========================================================
    THEME
-   ========================================================= */
+========================================================= */
 
 function toggleTheme(){
 
   isDark=!isDark;
 
-  document.body.classList.toggle(
-    'light',
-    !isDark
-  );
-
-  document.getElementById('themeBtn').textContent=
-    isDark?'🌙':'☀️';
-
-
-  map.removeLayer(
-    isDark
-    ?darkLayer
-    :satLayer
-  );
+  document
+    .body
+    .classList
+    .toggle(
+      'light',
+      !isDark
+    );
 
 
-  (
-    isDark
-    ?satLayer
-    :darkLayer
-  ).addTo(map);
+  document
+    .getElementById('themeBtn')
+    .textContent=
+      isDark
+        ?'🌙'
+        :'☀️';
+
+
+  if(isDark){
+
+    if(map.hasLayer(darkLayer))
+      map.removeLayer(darkLayer);
+
+    if(map.hasLayer(satLayer))
+      map.removeLayer(satLayer);
+
+    if(map.hasLayer(oceanLayer))
+      map.removeLayer(oceanLayer);
+
+    satLayer.addTo(map);
+
+  }else{
+
+    if(map.hasLayer(satLayer))
+      map.removeLayer(satLayer);
+
+    if(map.hasLayer(oceanLayer))
+      map.removeLayer(oceanLayer);
+
+    darkLayer.addTo(map);
+
+  }
 
 }
 
 
 /* =========================================================
-   TRANSLATIONS
-   ========================================================= */
+   I18N
+========================================================= */
 
 var i18n={
 
@@ -1663,9 +2521,11 @@ var i18n={
     especes:"Espèces",
     zones:"Zones",
     previsions:"Prévisions 7 jours",
+    previsionsCourtes:"Prév.",
     favoris:"Favoris",
     couches:"Couches",
     fond:"Fond marin",
+    fondCarte:"Fond carte",
     zonesP:"Zones de pêche",
     habitat:"Habitat",
     meteoAct:"Météo actuelle",
@@ -1677,7 +2537,8 @@ var i18n={
     slogan:"Plus qu'une carte...<br><b>votre allié en mer</b>",
     waves:"Vagues",
     favTitle:"Mes Favoris",
-    gps:"GPS"
+    gps:"GPS",
+    auto:"Actualisation auto"
   },
 
   ar:{
@@ -1686,9 +2547,11 @@ var i18n={
     especes:"الأنواع",
     zones:"المناطق",
     previsions:"توقعات 7 أيام",
+    previsionsCourtes:"توقعات",
     favoris:"المفضلة",
     couches:"الطبقات",
     fond:"قاع البحر",
+    fondCarte:"خريطة الأساس",
     zonesP:"مناطق الصيد",
     habitat:"الموطن",
     meteoAct:"الطقس الحالي",
@@ -1700,7 +2563,8 @@ var i18n={
     slogan:"أكثر من خريطة...<br><b>رفيقك في البحر</b>",
     waves:"الأمواج",
     favTitle:"مفضلتي",
-    gps:"تحديد موقعي"
+    gps:"تحديد موقعي",
+    auto:"التحديث التلقائي"
   }
 
 };
@@ -1710,30 +2574,35 @@ function toggleLang(){
 
   lang=
     lang==='fr'
-    ?'ar'
-    :'fr';
-
-
-  document.getElementById('langBtn').textContent=
-    lang==='fr'
-    ?'🌐 FR'
-    :'🌐 AR';
+      ?'ar'
+      :'fr';
 
 
   document.documentElement.lang=lang;
 
 
-  document.getElementById('sidebar')
+  document
+    .getElementById('langBtn')
+    .textContent=
+      lang==='fr'
+        ?'🌐 FR'
+        :'🌐 AR';
+
+
+  document
+    .getElementById('sidebar')
     .setAttribute(
       'dir',
       lang==='ar'
-      ?'rtl'
-      :'ltr'
+        ?'rtl'
+        :'ltr'
     );
 
 
   var els=
-    document.querySelectorAll('[data-i18n]');
+    document.querySelectorAll(
+      '[data-i18n]'
+    );
 
 
   for(
@@ -1743,9 +2612,11 @@ function toggleLang(){
   ){
 
     var key=
-      els[i].getAttribute(
+      els[i]
+      .getAttribute(
         'data-i18n'
       );
+
 
     if(i18n[lang][key])
       els[i].innerHTML=
@@ -1754,34 +2625,36 @@ function toggleLang(){
   }
 
 
-  document.getElementById(
-    'windLabel'
-  ).textContent=
-    i18n[lang].windLabel;
+  document
+    .getElementById('windLabel')
+    .textContent=
+      i18n[lang].windLabel;
 
 
-  document.getElementById(
-    'searchInput'
-  ).placeholder=
-    i18n[lang].search;
+  document
+    .getElementById('searchInput')
+    .placeholder=
+      i18n[lang].search;
 
 
-  document.getElementById(
-    'speciesSearch'
-  ).placeholder=
-    lang==='ar'
-    ?'🔍 ابحث...'
-    :'🔍 Filtrer...';
+  document
+    .getElementById('speciesSearch')
+    .placeholder=
+      lang==='ar'
+        ?'🔍 ابحث...'
+        :'🔍 Filtrer...';
 
 
-  document.getElementById(
-    'slogan'
-  ).innerHTML=
-    i18n[lang].slogan;
+  document
+    .getElementById('slogan')
+    .innerHTML=
+      i18n[lang].slogan;
 
 
   fetchWeather();
+
   renderSpecies('');
+
   renderFavs();
 
 }
@@ -1789,25 +2662,36 @@ function toggleLang(){
 
 /* =========================================================
    WEATHER ICON
-   ========================================================= */
+========================================================= */
 
 function weatherIcon(code){
 
-  if(code===0)return'☀️';
-  if(code<=3)return'⛅';
-  if(code<=48)return'🌫️';
-  if(code<=67)return'🌧️';
-  if(code<=77)return'🌨️';
-  if(code<=82)return'🌦️';
+  if(code===0)
+    return '☀️';
 
-  return'⛈️';
+  if(code<=3)
+    return '⛅';
+
+  if(code<=48)
+    return '🌫️';
+
+  if(code<=67)
+    return '🌧️';
+
+  if(code<=77)
+    return '🌨️';
+
+  if(code<=82)
+    return '🌦️';
+
+  return '⛈️';
 
 }
 
 
 /* =========================================================
    WIND DIRECTION
-   ========================================================= */
+========================================================= */
 
 function windDirName(deg){
 
@@ -1822,6 +2706,7 @@ function windDirName(deg){
     'NO'
   ];
 
+
   return dirs[
     Math.round(deg/45)%8
   ];
@@ -1830,28 +2715,38 @@ function windDirName(deg){
 
 
 /* =========================================================
-   HOURLY
-   ========================================================= */
+   HOURLY WEATHER
+========================================================= */
 
 function fetchHourly(){
 
   fetch(
-    'https://api.open-meteo.com/v1/forecast?latitude='+
-    currentLat+
-    '&longitude='+
-    currentLon+
-    '&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation&forecast_days=2&timezone=auto'
+    'https://api.open-meteo.com/v1/forecast?'+
+    'latitude='+currentLat+
+    '&longitude='+currentLon+
+    '&hourly='+
+      'temperature_2m,'+
+      'wind_speed_10m,'+
+      'wind_gusts_10m,'+
+      'wind_direction_10m,'+
+      'precipitation'+
+    '&forecast_days=2'+
+    '&timezone=auto'
   )
-
   .then(function(r){
-    return r.json()
+    return r.json();
   })
-
   .then(function(d){
 
-    var now=new Date();
+    if(!d.hourly)
+      return;
 
-    var h=now.getHours();
+
+    var now=
+      new Date();
+
+    var h=
+      now.getHours();
 
     var html='';
 
@@ -1863,6 +2758,7 @@ function fetchHourly(){
     ){
 
       var idx=h+i;
+
 
       if(
         idx>=d.hourly.time.length
@@ -1895,49 +2791,70 @@ function fetchHourly(){
 
       var col=
         ws<10
-        ?'text-green-400'
-        :ws<20
-        ?'text-yellow-400'
-        :'text-red-400';
+          ?'text-green-400'
+          :ws<20
+            ?'text-yellow-400'
+            :'text-red-400';
 
 
       var ic=
         pr>0
-        ?'🌧️'
-        :(idx>=7&&idx<=18
-          ?'☀️'
-          :'🌙');
+          ?'🌧️'
+          :(idx>=7&&idx<=18
+            ?'☀️'
+            :'🌙');
 
 
       html+=
         '<div class="hourCell">'+
-        '<p class="text-gray-400">'+t+'</p>'+
-        '<p>'+ic+'</p>'+
-        '<p class="'+col+' font-bold">🌬️'+ws+'</p>'+
-        '<p class="text-gray-400">💨'+gs+'</p>'+
-        '<p class="text-blue-300">💧'+pr+'</p>'+
+
+          '<p class="text-gray-400">'+
+            t+
+          '</p>'+
+
+          '<p>'+ic+'</p>'+
+
+          '<p class="'+
+            col+
+            ' font-bold">'+
+            '🌬️'+
+            ws+
+          '</p>'+
+
+          '<p class="text-gray-400">'+
+            '💨'+
+            gs+
+          '</p>'+
+
+          '<p class="text-blue-300">'+
+            '💧'+
+            pr+
+          '</p>'+
+
         '</div>';
 
     }
 
 
-    document.getElementById(
-      'hourlyBox'
-    ).innerHTML=html;
+    document
+      .getElementById('hourlyBox')
+      .innerHTML=html;
 
 
-    document.getElementById(
-      'hourlyTitle'
-    ).textContent=
-      lang==='ar'
-      ?'التوقعات ساعة بساعة'
-      :'Prévisions heure par heure';
+    document
+      .getElementById('hourlyTitle')
+      .textContent=
+        lang==='ar'
+          ?'التوقعات ساعة بساعة'
+          :'Prévisions heure par heure';
 
   })
-
   .catch(function(e){
 
-    console.log(e);
+    console.log(
+      'Hourly error:',
+      e
+    );
 
   });
 
@@ -1945,23 +2862,41 @@ function fetchHourly(){
 
 
 /* =========================================================
-   WEATHER
-   ========================================================= */
+   MAIN WEATHER
+========================================================= */
 
 function fetchWeather(){
 
   var url=
-    'https://api.open-meteo.com/v1/forecast?latitude='+
-    currentLat+
-    '&longitude='+
-    currentLon+
-    '&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&daily=wave_height_max,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code&timezone=auto';
+    'https://api.open-meteo.com/v1/forecast?'+
+    'latitude='+currentLat+
+    '&longitude='+currentLon+
+    '&current='+
+      'temperature_2m,'+
+      'wind_speed_10m,'+
+      'wind_direction_10m,'+
+      'wind_gusts_10m,'+
+      'weather_code'+
+    '&daily='+
+      'wave_height_max,'+
+      'temperature_2m_max,'+
+      'temperature_2m_min,'+
+      'wind_speed_10m_max,'+
+      'weather_code'+
+    '&timezone=auto';
 
 
   fetch(url)
 
   .then(function(r){
-    return r.json()
+
+    if(!r.ok)
+      throw new Error(
+        'Weather API'
+      );
+
+    return r.json();
+
   })
 
   .then(function(d){
@@ -1976,38 +2911,59 @@ function fetchWeather(){
       ).toFixed(1);
 
 
-    document.getElementById(
-      'liveData'
-    ).innerHTML=
-      '<p>🌬️ '+nd+
-      ' nd • 🌡️ '+
-      c.temperature_2m+
-      '°C • 💨 '+
+    var gust=
       (
         (c.wind_gusts_10m||0)
         /1.852
-      ).toFixed(0)+
-      ' nd</p>';
+      ).toFixed(0);
 
 
-    document.getElementById(
-      'tempVal'
-    ).textContent=
-      c.temperature_2m+'°C';
+    var wave=
+      d.daily &&
+      d.daily.wave_height_max &&
+      d.daily.wave_height_max[0]!=null
+        ?d.daily.wave_height_max[0]
+        :'--';
 
 
-    document.getElementById(
-      'windVal'
-    ).textContent=
-      nd+' nd';
+    document
+      .getElementById('liveData')
+      .innerHTML=
+        '<p>'+
+          '🌬️ '+nd+' nd'+
+          ' • 🌡️ '+c.temperature_2m+'°C'+
+          ' • 💨 '+gust+' nd'+
+        '</p>';
 
 
-    document.getElementById(
-      'waveVal'
-    ).textContent=
-      (
-        d.daily.wave_height_max[0]||'--'
-      )+' m';
+    document
+      .getElementById('tempVal')
+      .textContent=
+        c.temperature_2m+'°C';
+
+
+    document
+      .getElementById('windVal')
+      .textContent=
+        nd+' nd';
+
+
+    document
+      .getElementById('waveVal')
+      .textContent=
+        wave+' m';
+
+
+    document
+      .getElementById('mapWindBadge')
+      .textContent=
+        '🌬️ '+nd+' nd';
+
+
+    document
+      .getElementById('mapWaveBadge')
+      .textContent=
+        '🌊 '+wave+' m';
 
 
     var ar=
@@ -2035,25 +2991,28 @@ function fetchWeather(){
     if(ci){
 
       ci.innerHTML=
+
         '<p class="font-bold text-sm">'+
-        windDirName(
-          c.wind_direction_10m
-        )+
-        ' • '+
-        nd+
-        ' nd</p>'+
-        '<p class="text-gray-400">💨 الهبّات: '+
-        (
-          (c.wind_gusts_10m||0)
-          /1.852
-        ).toFixed(0)+
-        ' nd</p>'+
+          windDirName(
+            c.wind_direction_10m
+          )+
+          ' • '+
+          nd+
+          ' nd'+
+        '</p>'+
+
+        '<p class="text-gray-400">'+
+          '💨 الهبّات: '+
+          gust+
+          ' nd'+
+        '</p>'+
+
         '<p>'+
-        (
-          nd<15
-          ?'✅ ظروف آمنة للصيد'
-          :'⚠️ رياح قوية — احذر!'
-        )+
+          (
+            nd<15
+              ?'✅ ظروف آمنة للصيد'
+              :'⚠️ رياح قوية — احذر!'
+          )+
         '</p>';
 
     }
@@ -2061,24 +3020,24 @@ function fetchWeather(){
 
     var days=
       lang==='ar'
-      ?[
-        'أحد',
-        'إثن',
-        'ثلا',
-        'أرب',
-        'خمي',
-        'جمع',
-        'سبت'
-      ]
-      :[
-        'Dim',
-        'Lun',
-        'Mar',
-        'Mer',
-        'Jeu',
-        'Ven',
-        'Sam'
-      ];
+        ?[
+          'أحد',
+          'إثن',
+          'ثلا',
+          'أرب',
+          'خمي',
+          'جمع',
+          'سبت'
+        ]
+        :[
+          'Dim',
+          'Lun',
+          'Mar',
+          'Mer',
+          'Jeu',
+          'Ven',
+          'Sam'
+        ];
 
 
     var html='';
@@ -2096,78 +3055,131 @@ function fetchWeather(){
         );
 
 
+      var dailyWave=
+        d.daily.wave_height_max[i];
+
+
       html+=
+
         '<div class="glass rounded-lg p-1.5">'+
-        '<p class="text-gray-400">'+
-        days[day.getDay()]+
-        '</p>'+
-        '<p class="text-lg">'+
-        weatherIcon(
-          d.daily.weather_code[i]
-        )+
-        '</p>'+
-        '<p class="font-bold">'+
-        d.daily.temperature_2m_max[i]+
-        '°</p>'+
-        '<p class="text-gray-400">'+
-        d.daily.temperature_2m_min[i]+
-        '°</p>'+
-        '<p class="text-[10px] text-blue-300">🌬️'+
-        (
-          d.daily.wind_speed_10m_max[i]
-          /1.852
-        ).toFixed(0)+
-        'nd</p>'+
-        '<p class="text-[10px] text-cyan-300">🌊'+
-        (
-          d.daily.wave_height_max[i]||'--'
-        )+
-        'm</p>'+
+
+          '<p class="text-gray-400">'+
+            days[day.getDay()]+
+          '</p>'+
+
+          '<p class="text-lg">'+
+            weatherIcon(
+              d.daily.weather_code[i]
+            )+
+          '</p>'+
+
+          '<p class="font-bold">'+
+            d.daily.temperature_2m_max[i]+
+            '°'+
+          '</p>'+
+
+          '<p class="text-gray-400">'+
+            d.daily.temperature_2m_min[i]+
+            '°'+
+          '</p>'+
+
+          '<p class="text-[10px] text-blue-300">'+
+            '🌬️'+
+            (
+              d.daily.wind_speed_10m_max[i]
+              /1.852
+            ).toFixed(0)+
+            'nd'+
+          '</p>'+
+
+          '<p class="text-[10px] text-cyan-300">'+
+            '🌊'+
+            (
+              dailyWave!=null
+                ?dailyWave
+                :'--'
+            )+
+            'm'+
+          '</p>'+
+
         '</div>';
 
     }
 
 
-    document.getElementById(
-      'forecastContent'
-    ).innerHTML=html;
+    document
+      .getElementById('forecastContent')
+      .innerHTML=html;
 
 
     fetchHourly();
 
   })
 
-  .catch(function(){
+  .catch(function(e){
 
-    document.getElementById(
-      'liveData'
-    ).innerHTML=
-      '<p class="text-red-400">'+
-      '⚠️ Erreur connexion'+
-      '</p>';
+    console.log(
+      'Weather error:',
+      e
+    );
+
+
+    document
+      .getElementById('liveData')
+      .innerHTML=
+        '<p class="text-red-400">'+
+          '⚠️ Erreur connexion météo'+
+        '</p>';
 
   });
 
 }
 
 
-fetchWeather();
+/* =========================================================
+   AUTO WEATHER
+========================================================= */
 
-setInterval(
-  fetchWeather,
-  600000
-);
+function toggleAutoWeather(){
+
+  autoWeather=!autoWeather;
+
+
+  if(weatherTimer){
+
+    clearInterval(
+      weatherTimer
+    );
+
+    weatherTimer=null;
+
+  }
+
+
+  if(autoWeather){
+
+    weatherTimer=
+      setInterval(
+        fetchWeather,
+        600000
+      );
+
+  }
+
+}
 
 
 /* =========================================================
    GPS
-   ========================================================= */
+========================================================= */
 
 function myLocation(){
 
   if(!navigator.geolocation){
 
-    alert('⚠️ GPS غير مدعوم');
+    alert(
+      '⚠️ GPS غير مدعوم'
+    );
 
     return;
 
@@ -2180,11 +3192,15 @@ function myLocation(){
     );
 
 
-  box.classList.remove('hidden');
+  box.classList.remove(
+    'hidden'
+  );
 
 
   box.innerHTML=
-    '<p class="text-gray-400">📡 تحديد الموقع...</p>';
+    '<p class="text-gray-400">'+
+      '📡 تحديد الموقع...'+
+    '</p>';
 
 
   navigator.geolocation.getCurrentPosition(
@@ -2204,36 +3220,78 @@ function myLocation(){
 
       map.setView(
         [la,lo],
-        13
+        13,
+        {
+          animate:true
+        }
       );
 
 
-      L.marker(
-        [la,lo]
-      )
-      .addTo(map)
-      .bindPopup(
-        '<b>📍 أنت هنا</b>',
+      if(userMarker){
+
+        map.removeLayer(
+          userMarker
+        );
+
+      }
+
+
+      var userIcon=
+        L.divIcon({
+          className:'',
+          html:
+            '<div class="user-pin"></div>',
+          iconSize:[20,20],
+          iconAnchor:[10,10]
+        });
+
+
+      userMarker=
+        L.marker(
+          [la,lo],
+          {
+            icon:userIcon
+          }
+        )
+        .addTo(map);
+
+
+      userMarker.bindPopup(
+        '<div class="redline-card">'+
+          '<div class="redline-header">'+
+            '<div class="redline-title">'+
+              '📍 أنت هنا'+
+            '</div>'+
+          '</div>'+
+          '<div class="redline-body">'+
+            la.toFixed(5)+
+            ' , '+
+            lo.toFixed(5)+
+          '</div>'+
+        '</div>',
         {
           className:'redline-popup'
         }
-      )
-      .openPopup();
+      );
+
+
+      userMarker.openPopup();
 
 
       fetchWeather();
 
 
       fetch(
-        'https://api.open-meteo.com/v1/forecast?latitude='+
-        la+
-        '&longitude='+
-        lo+
-        '&daily=sunrise,sunset&current=temperature_2m,wind_speed_10m&timezone=auto'
+        'https://api.open-meteo.com/v1/forecast?'+
+        'latitude='+la+
+        '&longitude='+lo+
+        '&daily=sunrise,sunset'+
+        '&current=temperature_2m,wind_speed_10m'+
+        '&timezone=auto'
       )
 
       .then(function(r){
-        return r.json()
+        return r.json();
       })
 
       .then(function(d){
@@ -2260,22 +3318,27 @@ function myLocation(){
 
 
         box.innerHTML=
-          '<p>🌅 شروق: <b>'+
-          sr+
-          '</b> — 🌇 غروب: <b>'+
-          ss+
-          '</b></p>'+
-          '<p>📏 '+
-          la.toFixed(3)+
-          ' , '+
-          lo.toFixed(3)+
-          '</p>'+
+
           '<p>'+
-          (
-            safe
-            ?'✅ الرياح آمنة للصيد'
-            :'⚠️ رياح قوية — احذر!'
-          )+
+            '🌅 شروق: <b>'+
+            sr+
+            '</b> — 🌇 غروب: <b>'+
+            ss+
+            '</b>'+
+          '</p>'+
+
+          '<p>📏 '+
+            la.toFixed(3)+
+            ' , '+
+            lo.toFixed(3)+
+          '</p>'+
+
+          '<p>'+
+            (
+              safe
+                ?'✅ الرياح آمنة للصيد'
+                :'⚠️ رياح قوية — احذر!'
+            )+
           '</p>';
 
 
@@ -2292,8 +3355,7 @@ function myLocation(){
             f.lon-lo;
 
           var dd=
-            dx*dx+
-            dy*dy;
+            dx*dx+dy*dy;
 
 
           if(dd<bd){
@@ -2313,11 +3375,13 @@ function myLocation(){
 
 
           box.innerHTML+=
-            '<p>⭐ أقرب مفضلة: '+
-            best.name+
-            ' ('+
-            km.toFixed(1)+
-            ' كم)</p>';
+            '<p>'+
+              '⭐ أقرب مفضلة: '+
+              best.name+
+              ' ('+
+              km.toFixed(1)+
+              ' كم)'+
+            '</p>';
 
         }
 
@@ -2329,7 +3393,7 @@ function myLocation(){
 
       box.innerHTML=
         '<p class="text-red-400">'+
-        '⚠️ فشل تحديد الموقع — فعّل GPS'+
+          '⚠️ فشل تحديد الموقع — فعّل GPS'+
         '</p>';
 
     },
@@ -2346,14 +3410,16 @@ function myLocation(){
 
 /* =========================================================
    FAVORITES
-   ========================================================= */
+========================================================= */
 
 function loadFavs(){
 
-  if(!currentUser)return;
+  if(!currentUser)
+    return;
 
 
-  db.collection('favs')
+  db
+    .collection('favs')
     .doc(currentUser.uid)
     .collection('places')
     .get()
@@ -2378,7 +3444,10 @@ function loadFavs(){
 
     .catch(function(e){
 
-      console.log(e);
+      console.log(
+        'Fav error:',
+        e
+      );
 
     });
 
@@ -2390,9 +3459,7 @@ function addFav(lat,lon,name){
   if(!currentUser){
 
     alert(
-      lang==='ar'
-      ?'يجب تسجيل الدخول أولاً'
-      :'Veuillez vous connecter'
+      '⚠️ سجل الدخول أولاً'
     );
 
     return;
@@ -2414,7 +3481,8 @@ function addFav(lat,lon,name){
   }
 
 
-  db.collection('favs')
+  db
+    .collection('favs')
     .doc(currentUser.uid)
     .collection('places')
     .doc(
@@ -2432,7 +3500,12 @@ function addFav(lat,lon,name){
 
 function delFav(name){
 
-  db.collection('favs')
+  if(!currentUser)
+    return;
+
+
+  db
+    .collection('favs')
     .doc(currentUser.uid)
     .collection('places')
     .doc(
@@ -2456,7 +3529,7 @@ function renderFavs(){
 
     box.innerHTML=
       '<p class="text-gray-400 text-xs">'+
-      'Aucun favori / لا مفضلة بعد'+
+        'Aucun favori / لا مفضلة بعد'+
       '</p>';
 
     return;
@@ -2475,15 +3548,31 @@ function renderFavs(){
 
 
     html+=
+
       '<div class="flex justify-between items-center glass rounded-xl p-2">'+
-      '<span class="cursor-pointer hover:text-red-400" onclick="goTo('+f.lat+','+f.lon+',\''+
-      n+
-      '\');closeModal(\'favModal\')">📍 '+
-      f.name+
-      '</span>'+
-      '<button onclick="delFav(\''+
-      n+
-      '\')" class="text-red-500">🗑️</button>'+
+
+        '<span '+
+          'class="cursor-pointer hover:text-red-400" '+
+          'onclick="goTo('+
+            f.lat+
+            ','+
+            f.lon+
+            ',\''+
+            n+
+          '\');closeModal(\'favModal\')"'+
+        '>'+
+          '📍 '+
+          f.name+
+        '</span>'+
+
+        '<button '+
+          'onclick="delFav(\''+
+          n+
+          '\')" '+
+          'class="text-red-500">'+
+          '🗑️'+
+        '</button>'+
+
       '</div>';
 
   });
@@ -2507,14 +3596,16 @@ function openFavs(){
 
 /* =========================================================
    SEARCH
-   ========================================================= */
+========================================================= */
 
 var sTimeout;
 
 
 function searchPlace(q){
 
-  clearTimeout(sTimeout);
+  clearTimeout(
+    sTimeout
+  );
 
 
   var box=
@@ -2534,92 +3625,102 @@ function searchPlace(q){
   }
 
 
-  sTimeout=setTimeout(function(){
+  sTimeout=
+    setTimeout(function(){
 
-    fetch(
-      'https://nominatim.openstreetmap.org/search?format=json&q='+
-      encodeURIComponent(
-        q+' Tunisia'
-      )+
-      '&limit=6&accept-language=ar'
-    )
+      fetch(
+        'https://nominatim.openstreetmap.org/search?'+
+        'format=json'+
+        '&q='+
+        encodeURIComponent(
+          q+' Tunisia'
+        )+
+        '&limit=6'+
+        '&accept-language='+
+        lang
+      )
 
-    .then(function(r){
-      return r.json()
-    })
+      .then(function(r){
+        return r.json();
+      })
 
-    .then(function(results){
+      .then(function(results){
 
-      if(
-        !results||
-        !results.length
-      ){
+        if(
+          !results ||
+          !results.length
+        ){
 
-        box.innerHTML=
-          '<div class="px-3 py-2 text-xs text-gray-400">'+
-          '❌ لا نتائج'+
-          '</div>';
+          box.innerHTML=
+            '<div class="px-3 py-2 text-xs text-gray-400">'+
+              '❌ لا نتائج'+
+            '</div>';
+
+          box.classList.remove(
+            'hidden'
+          );
+
+          return;
+
+        }
+
+
+        var html='';
+
+
+        results.forEach(function(r){
+
+          var name=
+            r.display_name
+            .replace(/'/g,"");
+
+
+          html+=
+
+            '<div '+
+              'onclick="goTo('+
+                r.lat+
+                ','+
+                r.lon+
+                ',\''+
+                name+
+              '\')" '+
+              'class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">'+
+              '📍 '+
+              r.display_name+
+            '</div>';
+
+        });
+
+
+        box.innerHTML=html;
 
         box.classList.remove(
           'hidden'
         );
 
-        return;
-
-      }
-
-
-      var html='';
-
-
-      results.forEach(function(r){
-
-        var name=
-          r.display_name
-          .replace(/'/g,"");
-
-
-        html+=
-          '<div onclick="goTo('+
-          r.lat+
-          ','+
-          r.lon+
-          ',\''+
-          name+
-          '\')" class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">'+
-          '📍 '+
-          r.display_name+
-          '</div>';
-
-      });
-
-
-      box.innerHTML=html;
-
-      box.classList.remove(
-        'hidden'
-      );
-
-    })
-
-    .catch(function(){
-
-      fetch(
-        'https://photon.komoot.io/api/?q='+
-        encodeURIComponent(q)+
-        '&bbox=7.5,30,12.5,38&limit=6'
-      )
-
-      .then(function(r){
-        return r.json()
       })
 
-      .then(function(d){
+      .catch(function(){
 
-        var html='';
+        fetch(
+          'https://photon.komoot.io/api/?'+
+          'q='+
+          encodeURIComponent(q)+
+          '&bbox=7.5,30,12.5,38'+
+          '&limit=6'
+        )
+
+        .then(function(r){
+          return r.json();
+        })
+
+        .then(function(d){
+
+          var html='';
 
 
-        (d.features||[])
+          (d.features||[])
           .forEach(function(f){
 
             var name=
@@ -2635,72 +3736,91 @@ function searchPlace(q){
 
 
             name=
-              name.replace(/'/g,"");
+              name.replace(
+                /'/g,
+                ''
+              );
 
 
             html+=
-              '<div onclick="goTo('+
-              f.geometry.coordinates[1]+
-              ','+
-              f.geometry.coordinates[0]+
-              ',\''+
-              name+
-              '\')" class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">'+
-              '📍 '+
-              name+
+
+              '<div '+
+                'onclick="goTo('+
+                  f.geometry.coordinates[1]+
+                  ','+
+                  f.geometry.coordinates[0]+
+                  ',\''+
+                  name+
+                '\')" '+
+                'class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">'+
+                '📍 '+
+                name+
               '</div>';
 
           });
 
 
-        box.innerHTML=
-          html||
-          '<div class="px-3 py-2 text-xs text-gray-400">❌ لا نتائج</div>';
+          box.innerHTML=
+            html||
+            '<div class="px-3 py-2 text-xs text-gray-400">'+
+              '❌ لا نتائج'+
+            '</div>';
 
 
-        box.classList.remove(
-          'hidden'
-        );
+          box.classList.remove(
+            'hidden'
+          );
+
+        });
 
       });
 
-    });
-
-  },400);
+    },400);
 
 }
 
 
+/* =========================================================
+   GO TO LOCATION
+========================================================= */
+
 function goTo(lat,lon,name){
+
+  currentLat=
+    Number(lat);
+
+  currentLon=
+    Number(lon);
+
 
   map.setView(
     [lat,lon],
-    11
+    11,
+    {
+      animate:true
+    }
   );
 
 
   var fav=
     lang==='ar'
-    ?'أضف للمفضلة'
-    :'Ajouter aux favoris';
+      ?'أضف للمفضلة'
+      :'Ajouter aux favoris';
 
 
-  var html=
+  var popup=
+
     '<div class="redline-card">'+
 
       '<div class="redline-header">'+
 
         '<div class="redline-title">'+
-          '<span class="redline-title-icon">📍</span>'+
-          '<span>'+name+'</span>'+
+          '📍 '+
+          name+
         '</div>'+
 
         '<div class="redline-subtitle">'+
-          (
-            lang==='ar'
-            ?'معلومات الموقع والبحر'
-            :'Informations du site et de la mer'
-          )+
+          'Red Line Fishing'+
         '</div>'+
 
       '</div>'+
@@ -2708,48 +3828,27 @@ function goTo(lat,lon,name){
       '<div class="redline-body">'+
 
         '<div class="redline-row">'+
-          '<div class="redline-icon">📍</div>'+
-          '<div>'+
-            '<div class="redline-label">'+
-              (
-                lang==='ar'
-                ?'الموقع'
-                :'Position'
-              )+
-            '</div>'+
-            '<div class="redline-value">'+
-              lat.toFixed(3)+
-              ' , '+
-              lon.toFixed(3)+
-            '</div>'+
-          '</div>'+
+          '<span class="redline-icon">📌</span>'+
+          '<span class="redline-label">Latitude</span>'+
+          '<span class="redline-value">'+
+            Number(lat).toFixed(3)+
+          '</span>'+
         '</div>'+
 
         '<div class="redline-row">'+
-          '<div class="redline-icon">⭐</div>'+
-          '<div>'+
-            '<div class="redline-label">'+
-              (
-                lang==='ar'
-                ?'المفضلة'
-                :'Favori'
-              )+
-            '</div>'+
-            '<div class="redline-value">'+
-              (
-                lang==='ar'
-                ?'يمكنك الحفظ'
-                :'Disponible'
-              )+
-            '</div>'+
-          '</div>'+
+          '<span class="redline-icon">🧭</span>'+
+          '<span class="redline-label">Longitude</span>'+
+          '<span class="redline-value">'+
+            Number(lon).toFixed(3)+
+          '</span>'+
         '</div>'+
 
-        '<button class="redline-fav" onclick="addFav('+lat+','+lon+',\''+
-        name.replace(/'/g,"")+
-        '\')">'+
-        '⭐ '+
-        fav+
+        '<button '+
+          'onclick="addFav('+lat+','+lon+',\''+
+          name.replace(/'/g,'')+
+          '\')" '+
+          'class="redline-fav">'+
+          '⭐ '+fav+
         '</button>'+
 
       '</div>'+
@@ -2759,54 +3858,57 @@ function goTo(lat,lon,name){
 
   L.popup({
     className:'redline-popup',
-    maxWidth:290,
-    closeButton:true
+    maxWidth:300
   })
   .setLatLng(
     [lat,lon]
   )
-  .setContent(html)
+  .setContent(
+    popup
+  )
   .openOn(map);
-
-
-  currentLat=lat;
-  currentLon=lon;
 
 
   fetchWeather();
 
 
-  document.getElementById(
-    'searchResults'
-  ).classList.add(
-    'hidden'
-  );
+  document
+    .getElementById(
+      'searchResults'
+    )
+    .classList
+    .add('hidden');
 
 
-  document.getElementById(
-    'searchInput'
-  ).value='';
+  document
+    .getElementById(
+      'searchInput'
+    )
+    .value='';
 
 }
 
 
 /* =========================================================
    CLOSE SEARCH
-   ========================================================= */
+========================================================= */
 
 document.addEventListener(
   'click',
   function(e){
 
     if(
-      !e.target.closest('.relative')
+      !e.target.closest(
+        '.relative'
+      )
     ){
 
-      document.getElementById(
-        'searchResults'
-      ).classList.add(
-        'hidden'
-      );
+      document
+        .getElementById(
+          'searchResults'
+        )
+        .classList
+        .add('hidden');
 
     }
 
@@ -2815,8 +3917,8 @@ document.addEventListener(
 
 
 /* =========================================================
-   SPECIES
-   ========================================================= */
+   SPECIES RENDER
+========================================================= */
 
 function renderSpecies(filter){
 
@@ -2856,30 +3958,37 @@ function renderSpecies(filter){
 
 
     html+=
+
       '<div class="glass rounded-xl p-3 text-sm">'+
 
         '<div class="flex items-center gap-2 mb-1">'+
+
           '<span class="text-3xl">'+
             s.icon+
           '</span>'+
+
           '<b>'+
             (
               lang==='ar'
-              ?s.ar
-              :s.fr
+                ?s.ar
+                :s.fr
             )+
           '</b>'+
+
         '</div>'+
 
-        '<p class="text-xs text-gray-400">📍 '+
+        '<p class="text-xs text-gray-400">'+
+          '📍 '+
           regs+
         '</p>'+
 
-        '<p class="text-xs text-blue-300">📅 '+
+        '<p class="text-xs text-blue-300">'+
+          '📅 '+
           s.season+
         '</p>'+
 
-        '<p class="text-xs text-yellow-300">📏 '+
+        '<p class="text-xs text-yellow-300">'+
+          '📏 '+
           s.size+
         '</p>'+
 
@@ -2892,9 +4001,11 @@ function renderSpecies(filter){
   });
 
 
-  document.getElementById(
-    'speciesList'
-  ).innerHTML=html;
+  document
+    .getElementById(
+      'speciesList'
+    )
+    .innerHTML=html;
 
 }
 
@@ -2903,13 +4014,14 @@ function openSpecies(){
 
   renderSpecies('');
 
-
-  document.getElementById(
-    'speciesTitle'
-  ).textContent=
-    lang==='ar'
-    ?'الأنواع البحرية'
-    :'Espèces marines';
+  document
+    .getElementById(
+      'speciesTitle'
+    )
+    .textContent=
+      lang==='ar'
+        ?'الأنواع البحرية'
+        :'Espèces marines';
 
 
   openModal(
@@ -2921,12 +4033,13 @@ function openSpecies(){
 
 /* =========================================================
    MODALS
-   ========================================================= */
+========================================================= */
 
 function openModal(id){
 
   var m=
     document.getElementById(id);
+
 
   m.classList.remove(
     'hidden'
@@ -2944,6 +4057,7 @@ function closeModal(id){
   var m=
     document.getElementById(id);
 
+
   m.classList.add(
     'hidden'
   );
@@ -2957,27 +4071,38 @@ function closeModal(id){
 
 /* =========================================================
    PANELS
-   ========================================================= */
+========================================================= */
 
 function togglePanel(id){
 
-  var m=
+  var el=
     document.getElementById(id);
 
-  m.classList.toggle(
-    'hidden'
-  );
 
-  m.classList.toggle(
-    'md:block'
-  );
+  if(
+    el.classList.contains(
+      'hidden'
+    )
+  ){
+
+    el.classList.remove(
+      'hidden'
+    );
+
+  }else{
+
+    el.classList.add(
+      'hidden'
+    );
+
+  }
 
 }
 
 
 /* =========================================================
-   LAYERS
-   ========================================================= */
+   LAYER BUTTON
+========================================================= */
 
 function setLayer(mode){
 
@@ -2993,7 +4118,25 @@ function setLayer(mode){
     i++
   ){
 
-    btns[i].classList.remove(
+    btns[i]
+      .classList
+      .remove(
+        'bg-red-600',
+        'font-bold'
+      );
+
+  }
+
+
+  var btn=
+    document.getElementById(
+      'btn-'+mode
+    );
+
+
+  if(btn){
+
+    btn.classList.add(
       'bg-red-600',
       'font-bold'
     );
@@ -3001,22 +4144,41 @@ function setLayer(mode){
   }
 
 
-  document.getElementById(
-    'btn-'+mode
-  ).classList.add(
-    'bg-red-600',
-    'font-bold'
-  );
+  /*
+    عند اختيار الأمواج من القائمة
+    نشغل طبقة الأمواج مباشرة.
+  */
+
+  if(mode==='vagues'){
+
+    var sw=
+      document.getElementById(
+        'wavesSwitch'
+      );
+
+
+    if(
+      sw &&
+      !sw.classList.contains('on')
+    ){
+
+      sw.classList.add(
+        'on'
+      );
+
+      toggleWaves();
+
+    }
+
+  }
 
 }
 
 
 /* =========================================================
-   MODERN MAP CLICK POPUP
-   ========================================================= */
-
-var clickMarker=null;
-
+   MAP CLICK
+   MODERN POPUP
+========================================================= */
 
 map.on(
   'click',
@@ -3029,51 +4191,60 @@ map.on(
       e.latlng.lng;
 
 
-    if(clickMarker)
+    if(clickMarker){
+
       map.removeLayer(
         clickMarker
       );
 
+    }
+
 
     clickMarker=
       L.marker(
-        [la,lo]
-      ).addTo(map);
-
-
-    var loadingHtml=
-      '<div class="redline-card">'+
-        '<div class="redline-loading">'+
-          '<div class="redline-loading-icon">🌊</div>'+
-          '<b>'+
-          (
-            lang==='ar'
-            ?'جاري تحميل معلومات البحر...'
-            :'Chargement des données marines...'
-          )+
-          '</b>'+
-        '</div>'+
-      '</div>';
+        [la,lo],
+        {
+          opacity:.85
+        }
+      )
+      .addTo(map);
 
 
     clickMarker.bindPopup(
-      loadingHtml,
+      '<div class="redline-card">'+
+        '<div class="redline-loading">'+
+          '⏳ جاري تحميل بيانات البحر...'+
+        '</div>'+
+      '</div>',
       {
-        className:'redline-popup',
-        maxWidth:290
+        className:'redline-popup'
       }
-    ).openPopup();
+    )
+    .openPopup();
 
 
     fetch(
-      'https://api.open-meteo.com/v1/forecast?latitude='+
-      la+
-      '&longitude='+
-      lo+
-      '&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m&daily=wave_height_max,temperature_2m_max,temperature_2m_min&timezone=auto'
+      'https://api.open-meteo.com/v1/forecast?'+
+      'latitude='+la+
+      '&longitude='+lo+
+      '&current='+
+        'temperature_2m,'+
+        'wind_speed_10m,'+
+        'wind_direction_10m,'+
+        'wind_gusts_10m'+
+      '&daily='+
+        'wave_height_max,'+
+        'temperature_2m_max,'+
+        'temperature_2m_min'+
+      '&timezone=auto'
     )
 
     .then(function(r){
+
+      if(!r.ok)
+        throw new Error(
+          'API error'
+        );
 
       return r.json();
 
@@ -3101,232 +4272,146 @@ map.on(
 
       var wh=
         (
+          d.daily &&
           d.daily.wave_height_max &&
           d.daily.wave_height_max[0]!=null
         )
-        ?d.daily.wave_height_max[0].toFixed(1)+' m'
-        :'--';
+          ?d.daily.wave_height_max[0]
+          :'--';
 
 
       var safe=
-        nd<15;
+        Number(nd)<15;
 
 
       currentLat=la;
       currentLon=lo;
 
 
-      document.getElementById(
-        'windArrow'
-      ).style.transform=
-        'translate(-50%,-100%) rotate('+
-        c.wind_direction_10m+
-        'deg)';
-
-
-      document.getElementById(
-        'compassInfo'
-      ).innerHTML=
-        '<p class="font-bold text-sm">'+
-        windDirName(
-          c.wind_direction_10m
-        )+
-        ' • '+
-        nd+
-        ' nd</p>'+
-        '<p>'+
-        (
-          safe
-          ?'✅ آمن'
-          :'⚠️ احذر!'
-        )+
-        '</p>';
-
-
-      var title=
-        lang==='ar'
-        ?'موقع الصيد'
-        :'Zone de pêche';
-
-
-      var tempLabel=
-        lang==='ar'
-        ?'درجة الحرارة'
-        :'Température';
-
-
-      var windLabel=
-        lang==='ar'
-        ?'سرعة الرياح'
-        :'Vent';
-
-
-      var gustLabel=
-        lang==='ar'
-        ?'الهبات'
-        :'Rafales';
-
-
-      var dirLabel=
-        lang==='ar'
-        ?'الاتجاه'
-        :'Direction';
-
-
-      var waveLabel=
-        lang==='ar'
-        ?'الأمواج'
-        :'Vagues';
-
-
-      var safeText=
-        safe
-        ?(
-          lang==='ar'
-          ?'✅ ظروف مناسبة للصيد'
-          :'✅ Conditions favorables'
+      document
+        .getElementById(
+          'windArrow'
         )
-        :(
-          lang==='ar'
-          ?'⚠️ رياح قوية — احذر في البحر'
-          :'⚠️ Vent fort — prudence en mer'
-        );
+        .style.transform=
+          'translate(-50%,-100%) rotate('+
+          c.wind_direction_10m+
+          'deg)';
 
 
-      var favText=
-        lang==='ar'
-        ?'⭐ أضف الموقع للمفضلة'
-        :'⭐ Ajouter aux favoris';
+      document
+        .getElementById(
+          'compassInfo'
+        )
+        .innerHTML=
+          '<p class="font-bold text-sm">'+
+            windDirName(
+              c.wind_direction_10m
+            )+
+            ' • '+
+            nd+
+            ' nd'+
+          '</p>'+
+
+          '<p>'+
+            (
+              safe
+                ?'✅ آمن'
+                :'⚠️ احذر!'
+            )+
+          '</p>';
 
 
       var name=
-        lang==='ar'
-        ?'موقع الصيد'
-        :'Zone de pêche';
+        'موقع ('+
+        la.toFixed(3)+
+        ', '+
+        lo.toFixed(3)+
+        ')';
 
 
-      var popupHtml=
+      var html=
 
         '<div class="redline-card">'+
 
           '<div class="redline-header">'+
 
             '<div class="redline-title">'+
-              '<span class="redline-title-icon">🎣</span>'+
-              '<span>'+title+'</span>'+
+              '📍 حالة البحر'+
             '</div>'+
 
             '<div class="redline-subtitle">'+
-              la.toFixed(3)+
-              ' , '+
-              lo.toFixed(3)+
+              name+
             '</div>'+
 
           '</div>'+
 
           '<div class="redline-body">'+
 
-
             '<div class="redline-row">'+
-
-              '<div class="redline-icon">🌡️</div>'+
-
-              '<div>'+
-                '<div class="redline-label">'+
-                  tempLabel+
-                '</div>'+
-              '</div>'+
-
-              '<div class="redline-value">'+
+              '<span class="redline-icon">🌡️</span>'+
+              '<span class="redline-label">Température</span>'+
+              '<span class="redline-value">'+
                 c.temperature_2m+
-                ' °C'+
-              '</div>'+
-
+                '°C'+
+              '</span>'+
             '</div>'+
 
-
             '<div class="redline-row">'+
-
-              '<div class="redline-icon">🌬️</div>'+
-
-              '<div>'+
-                '<div class="redline-label">'+
-                  windLabel+
-                '</div>'+
-                '<div class="redline-label">'+
-                  dirLabel+
-                  ' '+
-                  windDirName(
-                    c.wind_direction_10m
-                  )+
-                '</div>'+
-              '</div>'+
-
-              '<div class="redline-value">'+
+              '<span class="redline-icon">🌬️</span>'+
+              '<span class="redline-label">Vent</span>'+
+              '<span class="redline-value">'+
                 nd+
                 ' nd'+
-              '</div>'+
-
+              '</span>'+
             '</div>'+
 
+            '<div class="redline-row">'+
+              '<span class="redline-icon">🧭</span>'+
+              '<span class="redline-label">Direction</span>'+
+              '<span class="redline-value">'+
+                windDirName(
+                  c.wind_direction_10m
+                )+
+              '</span>'+
+            '</div>'+
 
             '<div class="redline-row">'+
-
-              '<div class="redline-icon">💨</div>'+
-
-              '<div>'+
-                '<div class="redline-label">'+
-                  gustLabel+
-                '</div>'+
-              '</div>'+
-
-              '<div class="redline-value">'+
+              '<span class="redline-icon">💨</span>'+
+              '<span class="redline-label">Rafales</span>'+
+              '<span class="redline-value">'+
                 gs+
                 ' nd'+
-              '</div>'+
-
+              '</span>'+
             '</div>'+
-
 
             '<div class="redline-row">'+
-
-              '<div class="redline-icon">🌊</div>'+
-
-              '<div>'+
-                '<div class="redline-label">'+
-                  waveLabel+
-                '</div>'+
-              '</div>'+
-
-              '<div class="redline-value">'+
+              '<span class="redline-icon">🌊</span>'+
+              '<span class="redline-label">Vagues</span>'+
+              '<span class="redline-value">'+
                 wh+
-              '</div>'+
-
+                ' m'+
+              '</span>'+
             '</div>'+
-
 
             (
               safe
-              ?
-              '<div class="redline-safe">'+
-                safeText+
-              '</div>'
-              :
-              '<div class="redline-danger">'+
-                safeText+
-              '</div>'
+                ?
+                '<div class="redline-safe">'+
+                  '✅ ظروف آمنة للصيد'+
+                '</div>'
+                :
+                '<div class="redline-danger">'+
+                  '⚠️ رياح قوية — احذر!'+
+                '</div>'
             )+
 
-
-            '<button class="redline-fav" onclick="addFav('+la+','+lo+',\''+
-            name+
-            '\')">'+
-              favText+
+            '<button '+
+              'onclick="addFav('+la+','+lo+',\''+
+              name+
+              '\')" '+
+              'class="redline-fav">'+
+              '⭐ أضف للمفضلة'+
             '</button>'+
-
-            '<div class="redline-location">'+
-              'Red Line Fishing • Marine Data'+
-            '</div>'+
 
           '</div>'+
 
@@ -3334,24 +4419,72 @@ map.on(
 
 
       clickMarker.setPopupContent(
-        popupHtml
+        html
       );
+
+
+      document
+        .getElementById(
+          'tempVal'
+        )
+        .textContent=
+          c.temperature_2m+
+          '°C';
+
+
+      document
+        .getElementById(
+          'windVal'
+        )
+        .textContent=
+          nd+
+          ' nd';
+
+
+      document
+        .getElementById(
+          'waveVal'
+        )
+        .textContent=
+          wh+
+          ' m';
+
+
+      document
+        .getElementById(
+          'mapWindBadge'
+        )
+        .textContent=
+          '🌬️ '+
+          nd+
+          ' nd';
+
+
+      document
+        .getElementById(
+          'mapWaveBadge'
+        )
+        .textContent=
+          '🌊 '+
+          wh+
+          ' m';
 
     })
 
-    .catch(function(){
+    .catch(function(e){
+
+      console.log(
+        'Click weather error:',
+        e
+      );
+
 
       clickMarker.setPopupContent(
 
         '<div class="redline-card">'+
 
-          '<div class="redline-loading">'+
-            '<div class="redline-loading-icon">⚠️</div>'+
-            (
-              lang==='ar'
-              ?'تعذر تحميل بيانات البحر'
-              :'Impossible de charger les données'
-            )+
+          '<div class="redline-loading text-red-500">'+
+            '⚠️ خطأ في الاتصال'+
           '</div>'+
 
         '</div>'
@@ -3362,6 +4495,21 @@ map.on(
 
   }
 );
+
+
+/* =========================================================
+   START
+========================================================= */
+
+fetchWeather();
+
+
+weatherTimer=
+  setInterval(
+    fetchWeather,
+    600000
+  );
+
 
 </script>
 
