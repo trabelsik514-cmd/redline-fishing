@@ -6,7 +6,7 @@
 <title>Red Line Fishing</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script srchttps://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{font-family:'Segoe UI',Tahoma,sans-serif}
@@ -21,13 +21,31 @@ body.light{background:#e2e8f0;color:#0f172a}
 .switch.on{background:#dc2626}
 .switch::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s}
 .switch.on::after{left:25px}
-.float-btn{position:absolute;glass:true;z-index:1000;width:44px;height:44px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.float-btn{position:absolute;z-index:1000;width:44px;height:44px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:20px}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#dc2626;border-radius:9px}
 </style>
 </head>
 <body class="bg-slate-950 text-white h-screen overflow-hidden flex flex-col pb-14 md:pb-0">
 
-<header class="glass flex items-center gap-2 md:gap-4 px-3 py-2 z-20">
+<!-- ===== بوابة الاشتراك/الدخول ===== -->
+<div id="authScreen" class="fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center p-4">
+  <div class="glass rounded-3xl w-full max-w-sm p-6 text-center">
+    <p class="text-6xl mb-2">🎣</p>
+    <h2 class="font-black text-2xl italic mb-1"><span class="text-red-600">RED</span> LINE</h2>
+    <p class="text-[10px] tracking-[5px] text-gray-400 mb-5">FISHING</p>
+    <input id="authUser" type="text" placeholder="👤 اسم الصياد / Pseudo" class="w-full bg-slate-800/80 rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 ring-red-600 text-center mb-3">
+    <input id="authPass" type="password" placeholder="🔒 كلمة السر / Mot de passe" class="w-full bg-slate-800/80 rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 ring-red-600 text-center mb-3">
+    <p id="authError" class="text-red-500 text-xs hidden mb-2"></p>
+    <div class="flex gap-2">
+      <button onclick="authEnter()" class="flex-1 bg-red-600 rounded-full py-2.5 text-sm font-bold">🚪 دخول</button>
+      <button onclick="authRegister()" class="flex-1 border border-red-600 rounded-full py-2.5 text-sm font-bold text-red-500">✍️ اشتراك</button>
+    </div>
+    <p class="text-[10px] text-gray-500 mt-4">🐟 Red Line Fishing — رفيق الصياد في البحر<br>Entrer / S'inscrire</p>
+  </div>
+</div>
+
+<!-- ===== الهيدر ===== -->
+<header class="glass flex items-center gap-2 px-3 py-2 z-20">
   <div class="flex items-center gap-2">
     <span class="text-2xl">🐟</span>
     <div>
@@ -42,31 +60,28 @@ body.light{background:#e2e8f0;color:#0f172a}
   <div class="flex gap-1 items-center">
     <button onclick="toggleLang()" class="bg-red-600 rounded-full px-3 py-1.5 text-sm font-bold" id="langBtn">🌐 FR</button>
     <button onclick="toggleTheme()" class="text-lg" id="themeBtn">🌙</button>
-    <button onclick="openLogin()" class="text-lg" id="loginBtn">👤</button>
+    <button onclick="logoutUser()" class="text-lg hidden" id="logoutBtn">🚪</button>
   </div>
 </header>
 
 <div class="flex flex-1 overflow-hidden">
   <aside id="sidebar" class="hidden md:flex w-56 glass flex-col gap-1 p-2 text-sm" dir="ltr">
     <a class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🗺️ <span data-i18n="carte">Carte</span></a>
-    <a onclick="togglePanel('weatherPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🌤️ <span data-i18n="meteo">Météo & Mer</span></a>
-    <a class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🎣 <span data-i18n="peche">Pêche</span></a>
+    <a onclick="togglePanel('weatherPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🌤️ <span data-i18n="meteo">Météo</span></a>
     <a onclick="openSpecies()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">🐠 <span data-i18n="especes">Espèces</span></a>
     <a onclick="togglePanel('layersPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📍 <span data-i18n="zones">Zones</span></a>
     <a onclick="togglePanel('forecastPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📅 <span data-i18n="previsions">Prévisions</span></a>
     <a onclick="openFavs()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">⭐ <span data-i18n="favoris">Favoris</span></a>
-    <a class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">⚙️ <span data-i18n="param">Paramètres</span></a>
-    <p id="slogan" class="mt-auto italic text-red-500 text-center text-xs p-3">Plus qu'une carte...<br><b>votre allié en mer</b></p>
+    <p id="userSlot" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer mt-auto">👤 <span>...</span></p>
+    <p id="slogan" class="italic text-red-500 text-center text-xs p-3">Plus qu'une carte...<br><b>votre allié en mer</b></p>
   </aside>
 
   <main class="flex-1 relative">
     <div id="map" class="w-full h-full"></div>
 
-    <!-- أزرار عائمة -->
     <button onclick="togglePanel('weatherPanel')" class="float-btn glass top-3 right-3 md:hidden">🌬️</button>
     <button onclick="togglePanel('layersPanel')" class="float-btn glass top-[5.5rem] right-3 md:hidden">⚙️</button>
 
-    <!-- لوحة الطقس: مخفية على الموبايل، ظاهرة على الكمبيوتر -->
     <div id="weatherPanel" class="hidden md:block absolute top-3 right-3 left-3 md:left-auto md:w-80 glass rounded-2xl p-3 z-[1000]">
       <div class="flex justify-between items-center mb-3">
         <div class="flex justify-between text-center text-[10px] md:text-xs gap-1 flex-1">
@@ -82,7 +97,6 @@ body.light{background:#e2e8f0;color:#0f172a}
       <div id="liveData" class="text-xs border-t border-white/10 pt-2"><p class="text-gray-400">⏳ Chargement...</p></div>
     </div>
 
-    <!-- لوحة الطبقات: مخفية على الموبايل -->
     <div id="layersPanel" class="hidden md:block absolute top-[16.5rem] right-3 w-64 md:w-80 glass rounded-2xl p-3 z-[1000] text-sm space-y-2">
       <div class="flex justify-between items-center mb-1">
         <p class="font-bold" data-i18n="couches">Couches</p>
@@ -116,7 +130,7 @@ body.light{background:#e2e8f0;color:#0f172a}
   <button onclick="openSpecies()" class="flex flex-col items-center px-2">🐠<span data-i18n="especes">Espèces</span></button>
   <button onclick="togglePanel('forecastPanel')" class="flex flex-col items-center px-2">📅<span data-i18n="previsions">Prév.</span></button>
   <button onclick="openFavs()" class="flex flex-col items-center px-2">⭐<span data-i18n="favoris">Favoris</span></button>
-  <button onclick="openLogin()" class="flex flex-col items-center px-2">👤<span data-i18n="login">Compte</span></button>
+  <button onclick="logoutUser()" class="flex flex-col items-center px-2">🚪<span data-i18n="login">Compte</span></button>
 </nav>
 
 <div id="speciesModal" class="fixed inset-0 bg-black/70 z-[3000] hidden items-center justify-center p-3">
@@ -140,26 +154,58 @@ body.light{background:#e2e8f0;color:#0f172a}
   </div>
 </div>
 
-<div id="loginModal" class="fixed inset-0 bg-black/70 z-[3000] hidden items-center justify-center p-3">
-  <div class="glass rounded-2xl w-full max-w-sm p-5 text-center">
-    <p class="text-4xl mb-2">🎣</p>
-    <p class="font-bold text-lg mb-3" data-i18n="loginT">Connexion</p>
-    <input id="userInput" type="text" placeholder="Nom d'utilisateur" class="w-full bg-slate-800/80 rounded-full px-4 py-2 text-sm outline-none mb-3 text-center">
-    <div class="flex gap-2 justify-center">
-      <button onclick="doLogin()" class="bg-red-600 rounded-full px-6 py-2 text-sm font-bold" data-i18n="enter">Entrer</button>
-      <button onclick="doLogout()" class="rounded-full px-4 py-2 text-sm border border-white/20" data-i18n="logout">Sortir</button>
-    </div>
-  </div>
-</div>
-
 <script>
 var lang='fr',isDark=true,zoneMarkers=[],waveGroup=null,currentLat=36.8,currentLon=11.5;
 
+/* ===== نظام الاشتراك والدخول ===== */
+function getUsers(){return JSON.parse(localStorage.getItem('rlf_users')||'{}')}
+function authRegister(){
+  var u=document.getElementById('authUser').value.trim();
+  var p=document.getElementById('authPass').value;
+  var err=document.getElementById('authError');
+  if(u.length<3){err.textContent='⚠️ الاسم قصير / Pseudo trop court';err.classList.remove('hidden');return}
+  if(p.length<4){err.textContent='⚠️ كلمة السر 4 أحرف على الأقل / 4 caractères min';err.classList.remove('hidden');return}
+  var users=getUsers();
+  if(users[u]){err.textContent='⚠️ الاسم موجود — ادخل مباشرة / Déjà pris';err.classList.remove('hidden');return}
+  users[u]=p;
+  localStorage.setItem('rlf_users',JSON.stringify(users));
+  localStorage.setItem('rlf_user',u);
+  enterApp(u);
+}
+function authEnter(){
+  var u=document.getElementById('authUser').value.trim();
+  var p=document.getElementById('authPass').value;
+  var err=document.getElementById('authError');
+  var users=getUsers();
+  if(!users[u]){err.textContent='⚠️ غير مسجل — اشترك أولاً / Inscris-toi';err.classList.remove('hidden');return}
+  if(users[u]!==p){err.textContent='⚠️ كلمة السر خاطئة / Mot de passe faux';err.classList.remove('hidden');return}
+  localStorage.setItem('rlf_user',u);
+  enterApp(u);
+}
+function enterApp(u){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('logoutBtn').classList.remove('hidden');
+  document.getElementById('userSlot').innerHTML='👤 <b>'+u+'</b>';
+  map.invalidateSize();
+}
+function logoutUser(){
+  localStorage.removeItem('rlf_user');
+  location.reload();
+}
+(function(){
+  var u=localStorage.getItem('rlf_user');
+  var users=getUsers();
+  if(u&&users[u]){enterApp(u)}
+  else{document.getElementById('authScreen').style.display='flex'}
+})();
+
+/* ===== الخريطة ===== */
 var map=L.map('map',{zoomControl:false}).setView([36.8,11.5],7);
 var satLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri'}).addTo(map);
 var darkLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'CARTO'});
 L.control.scale({position:'bottomleft'}).addTo(map);
 
+/* ===== الأنواع ===== */
 var species=[
  {fr:"Daurade Royale",ar:"الدنيس الملكي",icon:"🐟",season:"Sep → Déc",size:"35 cm",regions:"n,c,s",desc:"أشهر سمك في تونس، يعيش قرب الصخور."},
  {fr:"Loup de Mer",ar:"القاروص",icon:"🐠",season:"Oct → Mar",size:"30 cm",regions:"n,c",desc:"يفضّل مصبات الأنهار والخلجان."},
@@ -186,6 +232,7 @@ var fishIcon=L.divIcon({className:'',html:'<div class="fish-pin"><span>🐟</spa
 });
 function toggleZones(){zoneMarkers.forEach(function(m){if(map.hasLayer(m))map.removeLayer(m);else map.addLayer(m)})}
 
+/* ===== الأمواج ===== */
 var wavePts=[[37.3,9.9],[37.0,10.5],[36.7,11.0],[36.4,11.4],[36.0,11.5],[35.6,11.3],[35.2,11.2],[34.7,11.1],[34.1,11.0],[33.5,11.0]];
 function toggleWaves(){
   if(waveGroup&&map.hasLayer(waveGroup)){map.removeLayer(waveGroup);waveGroup=null;return}
@@ -201,6 +248,7 @@ function toggleWaves(){
   }).catch(function(e){console.log(e)});
 }
 
+/* ===== الثيم ===== */
 function toggleTheme(){
   isDark=!isDark;
   document.body.classList.toggle('light',!isDark);
@@ -209,9 +257,10 @@ function toggleTheme(){
   (isDark?satLayer:darkLayer).addTo(map);
 }
 
+/* ===== الترجمة ===== */
 var i18n={
- fr:{carte:"Carte",meteo:"Météo",peche:"Pêche",especes:"Espèces",zones:"Zones",previsions:"Prévisions 7 jours",favoris:"Favoris",param:"Paramètres",couches:"Couches",fond:"Fond marin",zonesP:"Zones de pêche",habitat:"Habitat",meteoAct:"Météo actuelle",vaguesF:"Vagues",ventF:"Vent",meilleures:"Meilleures zones",windLabel:"🌬️ Vitesse du vent",search:"🔍 Rechercher...",slogan:"Plus qu'une carte...<br><b>votre allié en mer</b>",waves:"Vagues",favTitle:"Mes Favoris",login:"Compte",loginT:"Connexion",enter:"Entrer",logout:"Sortir",noFav:"Aucun favori"},
- ar:{carte:"الخريطة",meteo:"الطقس",peche:"الصيد",especes:"الأنواع",zones:"المناطق",previsions:"توقعات 7 أيام",favoris:"المفضلة",param:"الإعدادات",couches:"الطبقات",fond:"قاع البحر",zonesP:"مناطق الصيد",habitat:"الموطن",meteoAct:"الطقس الحالي",vaguesF:"الأمواج",ventF:"الرياح",meilleures:"أفضل المناطق",windLabel:"🌬️ سرعة الرياح",search:"🔍 ابحث عن مكان...",slogan:"أكثر من خريطة...<br><b>رفيقك في البحر</b>",waves:"الأمواج",favTitle:"مفضلتي",login:"حسابي",loginT:"تسجيل الدخول",enter:"دخول",logout:"خروج",noFav:"لا مفضلة بعد"}
+ fr:{carte:"Carte",meteo:"Météo",especes:"Espèces",zones:"Zones",previsions:"Prévisions 7 jours",favoris:"Favoris",couches:"Couches",fond:"Fond marin",zonesP:"Zones de pêche",habitat:"Habitat",meteoAct:"Météo actuelle",vaguesF:"Vagues",ventF:"Vent",meilleures:"Meilleures zones",windLabel:"🌬️ Vitesse du vent",search:"🔍 Rechercher...",slogan:"Plus qu'une carte...<br><b>votre allié en mer</b>",waves:"Vagues",favTitle:"Mes Favoris",login:"Compte"},
+ ar:{carte:"الخريطة",meteo:"الطقس",especes:"الأنواع",zones:"المناطق",previsions:"توقعات 7 أيام",favoris:"المفضلة",couches:"الطبقات",fond:"قاع البحر",zonesP:"مناطق الصيد",habitat:"الموطن",meteoAct:"الطقس الحالي",vaguesF:"الأمواج",ventF:"الرياح",meilleures:"أفضل المناطق",windLabel:"🌬️ سرعة الرياح",search:"🔍 ابحث عن مكان...",slogan:"أكثر من خريطة...<br><b>رفيقك في البحر</b>",waves:"الأمواج",favTitle:"مفضلتي",login:"حسابي"}
 };
 function toggleLang(){
   lang=(lang==='fr')?'ar':'fr';
@@ -227,6 +276,7 @@ function toggleLang(){
   fetchWeather();renderSpecies('');renderFavs();
 }
 
+/* ===== الطقس ===== */
 function weatherIcon(code){
   if(code===0)return'☀️';if(code<=3)return'⛅';if(code<=48)return'🌫️';
   if(code<=67)return'🌧️';if(code<=77)return'🌨️';if(code<=82)return'🌦️';return'⛈️';
@@ -250,6 +300,7 @@ function fetchWeather(){
 }
 fetchWeather();setInterval(fetchWeather,600000);
 
+/* ===== البحث ===== */
 var sTimeout;
 function searchPlace(q){
   clearTimeout(sTimeout);
@@ -293,6 +344,7 @@ function goTo(lat,lon,name){
 }
 document.addEventListener('click',function(e){if(!e.target.closest('.relative'))document.getElementById('searchResults').classList.add('hidden')});
 
+/* ===== المفضلة ===== */
 var favs=JSON.parse(localStorage.getItem('rlf_favs')||'[]');
 function addFav(lat,lon,name){
   for(var i=0;i<favs.length;i++){if(favs[i].name===name)return}
@@ -303,28 +355,17 @@ function addFav(lat,lon,name){
 function delFav(i){favs.splice(i,1);localStorage.setItem('rlf_favs',JSON.stringify(favs));renderFavs()}
 function renderFavs(){
   var box=document.getElementById('favList');
-  if(!favs.length){box.innerHTML='<p class="text-gray-400 text-xs">'+i18n[lang].noFav+'</p>';return}
+  if(!favs.length){box.innerHTML='<p class="text-gray-400 text-xs">Aucun favori / لا مفضلة بعد</p>';return}
   var html='';
   favs.forEach(function(f,i){
     var n=f.name.replace(/'/g,"");
-    html+='<div class="flex justify-between items-center glass rounded-xl p-2"><span class="cursor-pointer hover:text-red-400" onclick="goTo('+f.lat+','+f.lon+',\''+n+'\');closeModal(\'favModal\')">📍 '+f.name+'</span><button onclick="delFav('+i+')" class="text-red-500">🗑️</button></div>';
+    html+='<div class="flex justify-between items-center glass rounded-xl p-2"><span class="cursor-pointer hover:text-red-400" onclick="goTo('+f.lat+','+f.lon+',\''+n+'\closeModal(\'favModal\')">📍 '+f.name+'</span><button onclick="delFav('+i+')" class="text-red-500">🗑️</button></div>';
   });
   box.innerHTML=html;
 }
 function openFavs(){renderFavs();openModal('favModal')}
 
-function openLogin(){updateLoginUI();openModal('loginModal')}
-function updateLoginUI(){
-  var u=localStorage.getItem('rlf_user');
-  document.getElementById('loginBtn').textContent=u?'🟢':'👤';
-  document.getElementById('userInput').value=u||'';
-}
-function doLogin(){
-  var u=document.getElementById('userInput').value.trim();
-  if(u){localStorage.setItem('rlf_user',u);closeModal('loginModal');updateLoginUI()}
-}
-function doLogout(){localStorage.removeItem('rlf_user');closeModal('loginModal');updateLoginUI()}
-
+/* ===== الأنواع ===== */
 function renderSpecies(filter){
   var html='';
   species.forEach(function(s){
@@ -341,19 +382,19 @@ function openSpecies(){
   openModal('speciesModal');
 }
 
+/* ===== نوافذ ولوحات ===== */
 function openModal(id){var m=document.getElementById(id);m.classList.remove('hidden');m.classList.add('flex')}
 function closeModal(id){var m=document.getElementById(id);m.classList.add('hidden');m.classList.remove('flex')}
 function togglePanel(id){
-  document.getElementById(id).classList.toggle('hidden');
-  document.getElementById(id).classList.toggle('md:block');
+  var m=document.getElementById(id);
+  m.classList.toggle('hidden');
+  m.classList.toggle('md:block');
 }
 function setLayer(mode){
   var btns=document.querySelectorAll('.layer-btn');
   for(var i=0;i<btns.length;i++){btns[i].classList.remove('bg-red-600','font-bold')}
   document.getElementById('btn-'+mode).classList.add('bg-red-600','font-bold');
 }
-
-updateLoginUI();renderFavs();
 </script>
 </body>
 </html>
