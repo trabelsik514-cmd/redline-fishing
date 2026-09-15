@@ -67,6 +67,7 @@ body.light{background:#e2e8f0;color:#0f172a}
     <a onclick="togglePanel('layersPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📍 <span data-i18n="zones">Zones</span></a>
     <a onclick="togglePanel('forecastPanel')" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📅 <span data-i18n="previsions">Prévisions</span></a>
     <a onclick="openFavs()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">⭐ <span data-i18n="favoris">Favoris</span></a>
+    <a onclick="myLocation()" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer">📡 <span data-i18n="gps">GPS</span></a>
     <p id="userSlot" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer mt-auto">👤 <span>...</span></p>
     <p id="slogan" class="italic text-red-500 text-center text-xs p-3">Plus qu'une carte...<br><b>votre allié en mer</b></p>
   </aside>
@@ -74,7 +75,8 @@ body.light{background:#e2e8f0;color:#0f172a}
   <main class="flex-1 relative">
     <div id="map" class="w-full h-full"></div>
     <button onclick="togglePanel('weatherPanel')" class="float-btn glass top-3 right-3 md:hidden">🌬️</button>
-    <button onclick="togglePanel('layersPanel')" class="float-btn glass top-[5.5rem] right-3 md:hidden">⚙️</button>
+    <button onclick="myLocation()" class="float-btn glass top-[5.5rem] right-3 md:hidden">📍</button>
+    <button onclick="togglePanel('layersPanel')" class="float-btn glass top-[9.8rem] right-3 md:hidden">⚙️</button>
 
     <div id="weatherPanel" class="hidden md:block absolute top-3 right-3 left-3 md:left-auto md:w-80 glass rounded-2xl p-3 z-[1000]">
       <div class="flex justify-between items-center mb-3">
@@ -89,6 +91,8 @@ body.light{background:#e2e8f0;color:#0f172a}
       <p class="text-sm mb-1" id="windLabel">🌬️ Vitesse du vent</p>
       <div class="h-2 rounded-full bg-gradient-to-r from-blue-500 via-yellow-400 to-red-600 mb-3"></div>
       <div id="liveData" class="text-xs border-t border-white/10 pt-2"><p class="text-gray-400">⏳ Chargement...</p></div>
+      <button onclick="myLocation()" class="w-full mt-2 bg-blue-600 rounded-full py-2 text-xs font-bold">📍 أين أنا؟ / Où suis-je ?</button>
+      <div id="sunBox" class="mt-2 text-xs glass rounded-xl p-2 hidden"></div>
     </div>
 
     <div id="layersPanel" class="hidden md:block absolute top-[16.5rem] right-3 w-64 md:w-80 glass rounded-2xl p-3 z-[1000] text-sm space-y-2">
@@ -140,7 +144,7 @@ body.light{background:#e2e8f0;color:#0f172a}
 const firebaseConfig={apiKey:"AIzaSyCKLRKGwp5XBtEmwjMdrmDWg7-9S29ixgA",authDomain:"red-line-fishing.firebaseapp.com",projectId:"red-line-fishing",storageBucket:"red-line-fishing.firebasestorage.app",messagingSenderId:"1029157660725",appId:"1:1029157660725:web:2e1d308de2163f887ca97c"};
 firebase.initializeApp(firebaseConfig);
 var auth=firebase.auth(),db=firebase.firestore();
-var lang='fr',isDark=true,zoneMarkers=[],waveGroup=null,currentLat=36.8,currentLon=11.5,currentUser=null;
+var lang='fr',isDark=true,zoneMarkers=[],waveGroup=null,currentLat=36.8,currentLon=11.5,currentUser=null,favs=[];
 
 function showAuthMsg(t,col){var err=document.getElementById('authError');err.textContent=t;err.classList.remove('hidden');err.style.color=col||'#ef4444'}
 function authMsgFr(e){var c=e.code||'';
@@ -205,8 +209,8 @@ document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
 map.removeLayer(isDark?darkLayer:satLayer);(isDark?satLayer:darkLayer).addTo(map)}
 
 var i18n={
-fr:{carte:"Carte",meteo:"Météo",especes:"Espèces",zones:"Zones",previsions:"Prévisions 7 jours",favoris:"Favoris",couches:"Couches",fond:"Fond marin",zonesP:"Zones de pêche",habitat:"Habitat",meteoAct:"Météo actuelle",vaguesF:"Vagues",ventF:"Vent",meilleures:"Meilleures zones",windLabel:"🌬️ Vitesse du vent",search:"🔍 Rechercher...",slogan:"Plus qu'une carte...<br><b>votre allié en mer</b>",waves:"Vagues",favTitle:"Mes Favoris"},
-ar:{carte:"الخريطة",meteo:"الطقس",especes:"الأنواع",zones:"المناطق",previsions:"توقعات 7 أيام",favoris:"المفضلة",couches:"الطبقات",fond:"قاع البحر",zonesP:"مناطق الصيد",habitat:"الموطن",meteoAct:"الطقس الحالي",vaguesF:"الأمواج",ventF:"الرياح",meilleures:"أفضل المناطق",windLabel:"🌬️ سرعة الرياح",search:"🔍 ابحث عن مكان...",slogan:"أكثر من خريطة...<br><b>رفيقك في البحر</b>",waves:"الأمواج",favTitle:"مفضلتي"}};
+fr:{carte:"Carte",meteo:"Météo",especes:"Espèces",zones:"Zones",previsions:"Prévisions 7 jours",favoris:"Favoris",couches:"Couches",fond:"Fond marin",zonesP:"Zones de pêche",habitat:"Habitat",meteoAct:"Météo actuelle",vaguesF:"Vagues",ventF:"Vent",meilleures:"Meilleures zones",windLabel:"🌬️ Vitesse du vent",search:"🔍 Rechercher...",slogan:"Plus qu'une carte...<br><b>votre allié en mer</b>",waves:"Vagues",favTitle:"Mes Favoris",gps:"GPS"},
+ar:{carte:"الخريطة",meteo:"الطقس",especes:"الأنواع",zones:"المناطق",previsions:"توقعات 7 أيام",favoris:"المفضلة",couches:"الطبقات",fond:"قاع البحر",zonesP:"مناطق الصيد",habitat:"الموطن",meteoAct:"الطقس الحالي",vaguesF:"الأمواج",ventF:"الرياح",meilleures:"أفضل المناطق",windLabel:"🌬️ سرعة الرياح",search:"🔍 ابحث عن مكان...",slogan:"أكثر من خريطة...<br><b>رفيقك في البحر</b>",waves:"الأمواج",favTitle:"مفضلتي",gps:"تحديد موقعي"}};
 function toggleLang(){lang=(lang==='fr')?'ar':'fr';
 document.getElementById('langBtn').textContent=(lang==='fr')?'🌐 FR':'🌐 AR';
 document.documentElement.lang=lang;
@@ -235,7 +239,30 @@ document.getElementById('forecastContent').innerHTML=html;
 }).catch(function(){document.getElementById('liveData').innerHTML='<p class="text-red-400">⚠️ Erreur connexion</p>'})}
 fetchWeather();setInterval(fetchWeather,600000);
 
-var favs=[];
+function myLocation(){
+if(!navigator.geolocation){alert('⚠️ GPS غير مدعوم');return}
+var box=document.getElementById('sunBox');
+box.classList.remove('hidden');
+box.innerHTML='<p class="text-gray-400">📡 تحديد الموقع...</p>';
+navigator.geolocation.getCurrentPosition(function(pos){
+var la=pos.coords.latitude,lo=pos.coords.longitude;
+currentLat=la;currentLon=lo;
+map.setView([la,lo],13);
+L.marker([la,lo]).addTo(map).bindPopup('📍 أنت هنا').openOn(map);
+fetchWeather();
+fetch('https://api.open-meteo.com/v1/forecast?latitude='+la+'&longitude='+lo+'&daily=sunrise,sunset&current=temperature_2m,wind_speed_10m&timezone=auto')
+.then(function(r){return r.json()}).then(function(d){
+var sr=d.daily.sunrise[0].split('T')[1],ss=d.daily.sunset[0].split('T')[1];
+var nd=(d.current.wind_speed_10m/1.852).toFixed(1);
+var safe=nd<15;
+box.innerHTML='<p>🌅 شروق: <b>'+sr+'</b> — 🌇 غروب: <b>'+ss+'</b></p><p>📏 '+la.toFixed(3)+' , '+lo.toFixed(3)+'</p><p>'+(safe?'✅ الرياح آمنة للصيد':'⚠️ رياح قوية — احذر!')+'</p>';
+var best=null,bd=1e9;
+favs.forEach(function(f){var dx=f.lat-la,dy=f.lon-lo,dd=dx*dx+dy*dy;if(dd<bd){bd=dd;best=f}});
+if(best){var km=Math.sqrt(bd)*111;
+box.innerHTML+='<p>⭐ أقرب مفضلة: '+best.name+' ('+km.toFixed(1)+' كم)</p>'}
+});
+},function(){box.innerHTML='<p class="text-red-400">⚠️ فشل تحديد الموقع — فعّل GPS</p>'},{enableHighAccuracy:true,timeout:10000})}
+
 function loadFavs(){if(!currentUser)return;
 db.collection('favs').doc(currentUser.uid).collection('places').get().then(function(q){favs=[];q.forEach(function(doc){favs.push(doc.data())});renderFavs()}).catch(function(e){console.log(e)})}
 function addFav(lat,lon,name){if(!currentUser)return;
@@ -260,7 +287,7 @@ fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURICompo
 if(!results||!results.length){box.innerHTML='<div class="px-3 py-2 text-xs text-gray-400">❌ لا نتائج</div>';box.classList.remove('hidden');return}
 var html='';
 results.forEach(function(r){var name=r.display_name.replace(/'/g,"");
-html+='<div onclick="goTo('+r.lat+','+r.lon+',\''+name+'\')" class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">📍 '+r.display_name+'</div>'});
+html+='<div onclick="goTo('+r.lat+','+r.lon+',\''+name+'\')" class="px-3 py- hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">📍 '+r.display_name+'</div>'});
 box.innerHTML=html;box.classList.remove('hidden');
 }).catch(function(){
 fetch('https://photon.komoot.io/api/?q='+encodeURIComponent(q)+'&bbox=7.5,30,12.5,38&limit=6')
@@ -280,8 +307,8 @@ document.addEventListener('click',function(e){if(!e.target.closest('.relative'))
 function renderSpecies(filter){var html='';
 species.forEach(function(s){var q=(s.fr+' '+s.ar).toLowerCase();
 if(filter&&q.indexOf(filter.toLowerCase())===-1)return;
-var regs=s.regions.split(',').map(function(r){return lang==='ar'?regNames[r][1]:regNames[r][0]}).join(' • ');
-html+='<div class="glass rounded-xl p-3 text-sm"><div class="flex items-center gap-2 mb-1"><span class="text-3xl">'+s.icon+'</span><b>'+(lang==='ar'?s.ar:s.fr)+'</b></div><p class="text-xs text-gray-400">📍 '+regs+'</p><p classtext-xs text-blue-300">📅 '+s.season+'</p><p class="text-xs text-yellow-300">📏 '+s.size+'</p><p class="text-xs mt-1 text-gray-300">'+s.desc+'</p></div>'});
+var regs=s.regions.split(',').map(function(r){return lang==='ar'?regNames[r][1'?regNames[r][1]:regNames[r][0]}).join(' • ');
+html+='<div class="glass rounded-xl p-3 text-sm"><div class="flex items-center gap-2 mb-1"><span class="text-3xl">'+s.icon+'</span><b>'+(lang==='ar'?s.ar:s.fr)+'</b></div><p class="text-xs text-gray-400">📍 '+regs+'</p><p class="text-xs text-blue-300">📅 '+s.season+'</p><p class="text-xs text-yellow-300">📏 '+s.size+'</p><p class="text-xs mt-1 text-gray-300">'+s.desc+'</p></div>'});
 document.getElementById('speciesList').innerHTML=html}
 function openSpecies(){renderSpecies('');
 document.getElementById('speciesTitle').textContent=(lang==='ar')?'الأنواع البحرية':'Espèces marines';
