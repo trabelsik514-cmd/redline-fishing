@@ -351,7 +351,17 @@ function addFav(lat,lon,name){
   for(var i=0;i<favs.length;i++){if(favs[i].name===name)return}
   favs.push({lat:lat,lon:lon,name:name});
   localStorage.setItem('rlf_favs',JSON.stringify(favs));
-  renderFavs();
+  function renderFavs(){
+  var box=document.getElementById('favList');
+  if(!favs.length){box.innerHTML='<p class="text-gray-400 text-xs">Aucun favori / لا مفضلة بعد</p>';return}
+  var html='';
+  favs.forEach(function(f,i){
+    var n=f.name.replace(/'/g,"");
+    html+='<div class="flex justify-between items-center glass rounded-xl p-2"><span class="cursor-pointer hover:text-red-400" onclick="goTo('+f.lat+','+f.lon+',\''+n+'\');closeModal(\'favModal\')">📍 '+f.name+'</span><button onclick="delFav('+i+')" class="text-red-500">🗑️</button></div>';
+  });
+  box.innerHTML=html;
+}
+
 }
 function delFav(i){favs.splice(i,1);localStorage.setItem('rlf_favs',JSON.stringify(favs));renderFavs()}
 function renderFavs(){
