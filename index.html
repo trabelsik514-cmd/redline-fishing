@@ -307,7 +307,8 @@ document.addEventListener('click',function(e){if(!e.target.closest('.relative'))
 function renderSpecies(filter){var html='';
 species.forEach(function(s){var q=(s.fr+' '+s.ar).toLowerCase();
 if(filter&&q.indexOf(filter.toLowerCase())===-1)return;
-var regs=s.regions.split(',').map(function(r){return lang==='ar'?regNames[r][1'?regNames[r][1]:regNames[r][0]}).join(' • ');
+var regs=s.regions.split(',').map(function(r){return lang==='ar'?regNames[r][1]:regNames[r][0]}).join(' • ');
+
 html+='<div class="glass rounded-xl p-3 text-sm"><div class="flex items-center gap-2 mb-1"><span class="text-3xl">'+s.icon+'</span><b>'+(lang==='ar'?s.ar:s.fr)+'</b></div><p class="text-xs text-gray-400">📍 '+regs+'</p><p class="text-xs text-blue-300">📅 '+s.season+'</p><p class="text-xs text-yellow-300">📏 '+s.size+'</p><p class="text-xs mt-1 text-gray-300">'+s.desc+'</p></div>'});
 document.getElementById('speciesList').innerHTML=html}
 function openSpecies(){renderSpecies('');
