@@ -484,15 +484,27 @@ if (wind > 25 || wave > 2) {
 
       for (let i = 0; i < Math.min(6, times.length); i++) {
 for (let i = 0; i < Math.min(6, times.length); i++) {
+for (let i = 0; i < Math.min(6, times.length); i++) {
+
+  const date = new Date(times[i]);
+
+  const dateText = date.toLocaleString("fr-FR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 
   html +=
     "<div class='info-card'>" +
-    "<b>🕐</b>" +
-    "<span>" + times[i] + "</span>" +
-    "<strong>🌡️ " + temps[i] + " °C</strong>" +
-    "<small>💨 " + winds[i] +
-    " km/h · 🌊 " + waves[i] + " m</small>" +
+    "<b>📅 " + dateText + "</b>" +
+    "<span>🌡️ Température</span>" +
+    "<strong>" + (temps[i] ?? "--") + " °C</strong>" +
+    "<small>💨 Vent : " + (winds[i] ?? "--") +
+    " km/h · 🌊 Vagues : " + (waves[i] ?? "--") + " m</small>" +
     "</div>";
+}
 }
 
       }
