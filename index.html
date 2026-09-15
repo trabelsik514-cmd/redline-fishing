@@ -97,7 +97,8 @@ body.light{background:#e2e8f0;color:#0f172a}
 
     <div id="layersPanel" class="hidden md:block absolute top-[16.5rem] right-3 w-64 md:w-80 glass rounded-2xl p-3 z-[1000] text-sm space-y-2">
       <div class="flex justify-between items-center mb-1"><p class="font-bold" data-i18n="couches">Couches</p><button onclick="togglePanel('layersPanel')" class="text-gray-400 md:hidden">✕</button></div>
-      <div class="flex justify-between items-center"><span>🗿 <span data-i18n="fond">Fond marin</span></span><div class="switch" onclick="this.classList.toggle('on')"></div></div>
+      <div class="flex justify-between items-center"><span>🗿 <span data-i18n="fond">Fond marin</span></span><div class="switch" onclick="this.classList.toggle('on');toggleOcean()"></div></div>
+
       <div class="flex justify-between items-center"><span>🎣 <span data-i18n="zonesP">Zones de pêche</span></span><div class="switch on" onclick="this.classList.toggle('on');toggleZones()"></div></div>
       <div class="flex justify-between items-center"><span>🌊 <span data-i18n="waves">Vagues</span></span><div class="switch" onclick="this.classList.toggle('on');toggleWaves()"></div></div>
       <div class="flex justify-between items-center"><span>🌿 <span data-i18n="habitat">Habitat</span></span><div class="switch on" onclick="this.classList.toggle('on')"></div></div>
