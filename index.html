@@ -24,6 +24,13 @@ body.light{background:#e2e8f0;color:#0f172a}
 .switch.on::after{left:25px}
 .float-btn{position:absolute;z-index:1000;width:44px;height:44px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:20px}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#dc2626;border-radius:9px}
+.compass{width:130px;height:130px;border:2px solid rgba(255,255,255,.25);border-radius:50%;position:relative;margin:0 auto}
+.compass .dir{position:absolute;font-size:11px;color:#94a3b8;font-weight:bold}
+.compass .arrow{position:absolute;top:50%;left:50%;width:4px;height:48px;background:linear-gradient(to top,#dc2626,#fff);transform-origin:bottom center;border-radius:4px;transition:transform 1s}
+.compass .center{position:absolute;top:50%;left:50%;width:12px;height:12px;background:#dc2626;border-radius:50%;transform:translate(-50%,-50%)}
+.hourRow{display:flex;gap:4px;overflow-x:auto;padding:4px 0}
+.hourCell{min-width:52px;text-align:center;background:rgba(255,255,255,.06);border-radius:10px;padding:6px 2px;font-size:11px}
+body.light .hourCell{background:rgba(0,0,0,.05)}
 </style>
 </head>
 <body class="bg-slate-950 text-white h-screen overflow-hidden flex flex-col pb-14 md:pb-0">
@@ -78,9 +85,9 @@ body.light{background:#e2e8f0;color:#0f172a}
     <button onclick="myLocation()" class="float-btn glass top-[5.5rem] right-3 md:hidden">📍</button>
     <button onclick="togglePanel('layersPanel')" class="float-btn glass top-[9.8rem] right-3 md:hidden">⚙️</button>
 
-    <div id="weatherPanel" class="hidden md:block absolute top-3 right-3 left-3 md:left-auto md:w-80 glass rounded-2xl p-3 z-[1000]">
+    <div id="weatherPanel" class="hidden md:block absolute top-3 right-3 left-3 md:left-auto md:w-80 glass rounded-2xl p-3 z-[1000] max-h-[90%] overflow-y-auto">
       <div class="flex justify-between items-center mb-3">
-        <div="flex justify-between text-center text-[10px] md:text-xs gap-1 flex-1">
+        <div class="flex justify-between text-center text-[10px] md:text-xs gap-1 flex-1">
           <button onclick="setLayer('vent')" id="btn-vent" class="layer-btn bg-red-600 rounded-lg px-2 py-2 font-bold">🌬️ Vent</button>
           <button onclick="setLayer('vagues')" id="btn-vagues" class="layer-btn rounded-lg px-2 py-2">🌊 Vagues</button>
           <button onclick="setLayer('courants')" id="btn-courants" class="layer-btn rounded-lg px-2 py-2">🧭 Courants</button>
@@ -93,6 +100,21 @@ body.light{background:#e2e8f0;color:#0f172a}
       <div id="liveData" class="text-xs border-t border-white/10 pt-2"><p class="text-gray-400">⏳ Chargement...</p></div>
       <button onclick="myLocation()" class="w-full mt-2 bg-blue-600 rounded-full py-2 text-xs font-bold">📍 أين أنا؟ / Où suis-je ?</button>
       <div id="sunBox" class="mt-2 text-xs glass rounded-xl p-2 hidden"></div>
+      <div class="mt-3 border-t border-white/10 pt-3">
+        <div class="flex items-center gap-3">
+          <div class="compass" id="compass">
+            <span class="dir" style="top:4px;left:50%;transform:translateX(-50%)">N</span>
+            <span class="dir" style="bottom:4px;left:50%;transform:translateX(-50%)">S</span>
+            <span class="dir" style="left:6px;top:50%;transform:translateY(-50%)">W</span>
+            <span class="dir" style="right:6px;top:50%;transform:translateY(-50%)">E</span>
+            <div class="arrow" id="windArrow" style="transform:translate(-50%,-100%) rotate(0deg)"></div>
+            <div class="center"></div>
+          </div>
+          <div class="text-xs flex-1" id="compassInfo">⏳ ...</div>
+        </div>
+        <p class="font-bold mt-3 mb-1 text-xs">⏰ <span id="hourlyTitle">Prévisions heure par heure</span></p>
+        <div class="hourRow" id="hourlyBox"></div>
+      </div>
     </div>
 
     <div id="layersPanel" class="hidden md:block absolute top-[16.5rem] right-3 w-64 md:w-80 glass rounded-2xl p-3 z-[1000] text-sm space-y-2">
@@ -227,18 +249,42 @@ document.getElementById('slogan').innerHTML=i18n[lang].slogan;
 fetchWeather();renderSpecies('');renderFavs()}
 
 function weatherIcon(code){if(code===0)return'☀️';if(code<=3)return'⛅';if(code<=48)return'🌫️';if(code<=67)return'🌧️';if(code<=77)return'🌨️';if(code<=82)return'🌦️';return'⛈️'}
+function windDirName(deg){var dirs=['N','NE','E','SE','S','SO','O','NO'];
+return dirs[Math.round(deg/45)%8]}
+function fetchHourly(){
+fetch('https://api.open-meteo.com/v1/forecast?latitude='+currentLat+'&longitude='+currentLon+'&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation&forecast_days=2&timezone=auto')
+.then(function(r){return r.json()}).then(function(d){
+var now=new Date(),h=now.getHours(),html='';
+for(var i=0;i<24;i++){var idx=h+i;
+if(idx>=d.hourly.time.length)break;
+var t=d.hourly.time[idx].split('T')[1];
+var ws=(d.hourly.wind_speed_10m[idx]/1.852).toFixed(0);
+var gs=(d.hourly.wind_gusts_10m[idx]/1.852).toFixed(0);
+var pr=d.hourly.precipitation[idx];
+var col=ws<10?'text-green-400':ws<20?'text-yellow-400':'text-red-400';
+var ic=pr>0?'🌧️':(idx>=7&&idx<=18?'☀️':'🌙');
+html+='<div class="hourCell"><p class="text-gray-400">'+t+'</p><p>'+ic+'</p><p class="'+col+' font-bold">🌬️'+ws+'</p><p class="text-gray-400">💨'+gs+'</p><p class="text-blue-300">💧'+pr+'</p></div>'}
+document.getElementById('hourlyBox').innerHTML=html;
+document.getElementById('hourlyTitle').textContent=(lang==='ar')?'التوقعات ساعة بساعة':'Prévisions heure par heure';
+}).catch(function(e){console.log(e)})}
+
 function fetchWeather(){
-var url='https://api.open-meteo.com/v1/forecast?latitude='+currentLat+'&longitude='+currentLon+'&current=temperature_2m,wind_speed_10m,weather_code&daily=wave_height_max,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code&timezone=auto';
+var url='https://api.open-meteo.com/v1/forecast?latitude='+currentLat+'&longitude='+currentLon+'&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&daily=wave_height_max,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code&timezone=auto';
 fetch(url).then(function(r){return r.json()}).then(function(d){
 var c=d.current,nd=(c.wind_speed_10m/1.852).toFixed(1);
-document.getElementById('liveData').innerHTML='<p>🌬️ '+nd+' nd • 🌡️ '+c.temperature_2m+'°C</p>';
+document.getElementById('liveData').innerHTML='<p>🌬️ '+nd+' nd • 🌡️ '+c.temperature_2m+'°C • 💨 '+((c.wind_gusts_10m||0)/1.852).toFixed(0)+' nd</p>';
 document.getElementById('tempVal').textContent=c.temperature_2m+'°C';
 document.getElementById('windVal').textContent=nd+' nd';
 document.getElementById('waveVal').textContent=(d.daily.wave_height_max[0]||'--')+' m';
-var days=(lang==='ar')?['أحد','إثن','ثلا','أرب','خمي','جمع','سبت']:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],html='';
+var ar=document.getElementById('windArrow');
+if(ar){ar.style.transform='translate(-50%,-100%) rotate('+c.wind_direction_10m+'deg)'}
+var ci=document.getElementById('compassInfo');
+if(ci){ci.innerHTML='<p class="font-bold text-sm">'+windDirName(c.wind_direction_10m)+' • '+nd+' nd</p><p class="text-gray-400">💨 الهبّات: '+((c.wind_gusts_10m||0)/1.852).toFixed(0)+' nd</p><p>'+(nd<15?'✅ ظروف آمنة للصيد':'⚠️ رياح قوية — احذر!')+'</p>'}
+var days=(lang==='ar')?['أحدإثن','ثلا','أرب','خمي','جمع','سبت']:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],html='';
 for(var i=0;i<7;i++){var day=new Date(d.daily.time[i]);
 html+='<div class="glass rounded-lg p-1.5"><p class="text-gray-400">'+days[day.getDay()]+'</p><p class="text-lg">'+weatherIcon(d.daily.weather_code[i])+'</p><p class="font-bold">'+d.daily.temperature_2m_max[i]+'°</p><p class="text-gray-400">'+d.daily.temperature_2m_min[i]+'°</p><p class="text-[10px] text-blue-300">🌬️'+(d.daily.wind_speed_10m_max[i]/1.852).toFixed(0)+'nd</p><p class="text-[10px] text-cyan-300">🌊'+(d.daily.wave_height_max[i]||'--')+'m</p></div>'}
 document.getElementById('forecastContent').innerHTML=html;
+fetchHourly();
 }).catch(function(){document.getElementById('liveData').innerHTML='<p class="text-red-400">⚠️ Erreur connexion</p>'})}
 fetchWeather();setInterval(fetchWeather,600000);
 
@@ -288,7 +334,6 @@ sTimeout=setTimeout(function(){
 fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q+' Tunisia')+'&limit=6&accept-language=ar')
 .then(function(r){return r.json()}).then(function(results){
 if(!results||!results.length){box.innerHTML='<div class="px-3 py-2 text-xs text-gray-400">❌ لا نتائج</div>';box.classList.remove('hidden');return}
-
 var html='';
 results.forEach(function(r){var name=r.display_name.replace(/'/g,"");
 html+='<div onclick="goTo('+r.lat+','+r.lon+',\''+name+'\')" class="px-3 py-2 hover:bg-red-600/30 cursor-pointer text-sm border-b border-white/5">📍 '+r.display_name+'</div>'});
