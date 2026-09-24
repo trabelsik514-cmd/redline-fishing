@@ -1,1 +1,152 @@
 
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    background: #020617;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    height: 70px;
+    padding: 0 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    background: rgba(10,20,40,.95);
+}
+
+.brand {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.brand-red {
+    color: #dc2626;
+}
+
+.brand small {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 5px;
+    color: #94a3b8;
+    margin-left: 32px;
+}
+
+#langBtn {
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 14px;
+    cursor: pointer;
+}
+
+.main {
+    flex: 1;
+    width: 100%;
+    max-width: 1100px;
+    margin: auto;
+    padding: 50px 20px;
+}
+
+.hero {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.fish-icon {
+    font-size: 70px;
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-size: 42px;
+    margin-bottom: 12px;
+}
+
+.hero p {
+    color: #94a3b8;
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.start-btn {
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.start-btn:hover {
+    background: #b91c1c;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.feature {
+    background: rgba(15,23,42,.85);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+}
+
+.feature span {
+    font-size: 40px;
+}
+
+.feature h2 {
+    margin: 15px 0 10px;
+}
+
+.feature p {
+    color: #94a3b8;
+    line-height: 1.6;
+}
+
+footer {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    color: #64748b;
+    font-size: 13px;
+    border-top: 1px solid rgba(255,255,255,.08);
+}
+
+@media (max-width: 700px) {
+
+    .hero h1 {
+        font-size: 30px;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        padding: 0 15px;
+    }
+
+    footer {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+}
