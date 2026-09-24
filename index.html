@@ -1,1 +1,105 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Red Line Fishing</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="brand">
+            <span class="brand-red">RED</span>
+            <span> LINE</span>
+            <small>FISHING</small>
+        </div>
+
+        <button
+            id="langBtn"
+            onclick="toggleLanguage()"
+        >
+            🌐 FR
+        </button>
+    </header>
+
+    <main class="main">
+
+        <section class="hero">
+            <div class="fish-icon">🐟</div>
+
+            <h1 id="title">
+                RED LINE FISHING
+            </h1>
+
+            <p id="subtitle">
+                Votre allié en mer
+            </p>
+
+            <button
+                class="start-btn"
+                onclick="startApp()"
+            >
+                🎣 Commencer
+            </button>
+        </section>
+
+        <section class="features">
+
+            <div class="feature">
+                <span>🌊</span>
+                <h2 id="weatherTitle">
+                    Météo & Mer
+                </h2>
+                <p id="weatherText">
+                    Conditions marines et météo.
+                </p>
+            </div>
+
+            <div class="feature">
+                <span>🎣</span>
+                <h2 id="fishingTitle">
+                    Pêche
+                </h2>
+                <p id="fishingText">
+                    Préparez vos sorties de pêche.
+                </p>
+            </div>
+
+            <div class="feature">
+                <span>⚓</span>
+                <h2 id="portsTitle">
+                    Ports
+                </h2>
+                <p id="portsText">
+                    Découvrez les ports tunisiens.
+                </p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        <span>
+            RED LINE FISHING
+        </span>
+        <span>
+            © 2026
+        </span>
+    </footer>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
