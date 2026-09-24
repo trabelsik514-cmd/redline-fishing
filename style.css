@@ -1,0 +1,101 @@
+/* Red Line Fishing - extracted from FINAL VERIFIED */
+body{font-family:'Segoe UI',Tahoma,sans-serif}
+.sidebar-item:hover{background:rgba(220,38,38,.2)}.sidebar-item.active{background:#dc2626}
+.glass{background:rgba(10,20,40,.85);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1)}
+body.light .glass{background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.1);color:#0f172a}
+body.light{background:#e2e8f0;color:#0f172a}
+.fish-pin{background:#dc2626;width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.fish-pin span{transform:rotate(45deg);font-size:16px}
+.port-pin{width:36px;height:36px;border-radius:50%;background:#0ea5e9;border:2px solid #fff;
+display:flex;align-items:center;justify-content:center;box-shadow:0 5px 18px #0008;font-size:18px}
+.port-pin.active{background:#2563eb}
+.port-card{width:300px;background:#071d35;color:#fff;border-radius:16px;overflow:hidden}
+.port-head{padding:12px 14px;background:linear-gradient(135deg,#0f3558,#08233d)}
+.port-head b{font-size:15px}.port-sub{font-size:10px;color:#94a3b8;margin-top:3px}
+.port-body{padding:12px}.port-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.port-m{background:#ffffff0a;border-radius:10px;padding:8px}.port-m small{display:block;color:#94a3b8;font-size:9px}.port-m b{display:block;margin-top:3px}
+.port-action{display:block;text-align:center;margin-top:9px;padding:9px;border-radius:10px;background:#dc2626;color:#fff;font-weight:bold;text-decoration:none;font-size:11px}
+
+.switch{width:44px;height:22px;background:#374151;border-radius:99px;position:relative;cursor:pointer;transition:.3s;flex-shrink:0}
+.switch.on{background:#dc2626}
+.switch::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s}
+.switch.on::after{left:25px}
+.float-btn{position:absolute;z-index:1000;width:44px;height:44px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:20px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:#dc2626;border-radius:9px}
+.compass{width:130px;height:130px;border:2px solid rgba(255,255,255,.25);border-radius:50%;position:relative;margin:0 auto}
+.compass .dir{position:absolute;font-size:11px;color:#94a3b8;font-weight:bold}
+.compass .arrow{position:absolute;top:50%;left:50%;width:4px;height:48px;background:linear-gradient(to top,#dc2626,#fff);transform-origin:bottom center;border-radius:4px;transition:transform 1s}
+.compass .center{position:absolute;top:50%;left:50%;width:12px;height:12px;background:#dc2626;border-radius:50%;transform:translate(-50%,-50%)}
+.hourRow{display:flex;gap:4px;overflow-x:auto;padding:4px 0}
+.hourCell{min-width:52px;text-align:center;background:rgba(255,255,255,.06);border-radius:10px;padding:6px 2px;font-size:11px}
+body.light .hourCell{background:rgba(0,0,0,.05)}
+
+/* ===== RED LINE FISHING — MAP PRO ===== */
+.redline-popup .leaflet-popup-content-wrapper{background:transparent!important;padding:0!important;border-radius:20px!important;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.48)!important}
+.redline-popup .leaflet-popup-content{margin:0!important;width:320px!important}.redline-popup .leaflet-popup-tip{background:#071d35!important}
+.rl-map-popup{width:320px;overflow:hidden;font-family:'Segoe UI',Tahoma,sans-serif;direction:rtl;color:#fff;background:#071d35}
+.rl-popup-head{position:relative;padding:15px 16px 13px;background:linear-gradient(135deg,#082c49,#0d4668);border-bottom:1px solid rgba(255,255,255,.12)}
+.rl-popup-icon{position:absolute;left:14px;top:14px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#dc2626;font-size:20px}
+.rl-popup-title{padding-left:48px;font-size:16px;font-weight:900;color:#fff}.rl-popup-sub{padding-left:48px;margin-top:3px;color:#9fc3da;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl-popup-close{position:absolute;right:10px;top:8px;border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+.rl-popup-body{padding:13px;background:#09243b}.rl-coordinates{display:grid;grid-template-columns:1fr 1fr;gap:7px;direction:ltr}
+.rl-coordinates div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:8px;text-align:center}.rl-coordinates span{display:block;font-size:9px;color:#8fb2c8;margin-bottom:3px}.rl-coordinates b{font-size:12px;color:#fff}
+.rl-copy-btn{width:100%;margin-top:8px;border:0;border-radius:10px;padding:8px;background:#164b6d;color:#fff;font-weight:700;font-size:11px;cursor:pointer}.rl-copy-btn:hover{background:#1b638d}
+.rl-section-title{margin-top:13px;margin-bottom:8px;font-size:11px;font-weight:900;color:#8ed8ff}.rl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.rl-data{background:rgba(255,255,255,.055);border-radius:11px;padding:8px;text-align:center}.rl-data span{display:block;font-size:17px}.rl-data small{display:block;color:#8daabd;font-size:9px;margin-top:2px}.rl-data b{display:block;color:#fff;font-size:12px;margin-top:2px}
+.rl-safe,.rl-warning{margin-top:10px;border-radius:11px;padding:9px;text-align:center;font-size:11px;font-weight:800}.rl-safe{background:rgba(22,163,74,.18);border:1px solid rgba(34,197,94,.25);color:#4ade80}.rl-warning{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.25);color:#fbbf24}
+.rl-fav-btn{width:100%;margin-top:9px;border:0;border-radius:12px;padding:10px;background:#dc2626;color:#fff;font-weight:900;font-size:11px;cursor:pointer}.rl-fav-btn:hover{background:#b91c1c}.rl-source{text-align:center;margin-top:9px;color:#63869d;font-size:8px}.rl-loading{margin-top:10px;padding:13px;border-radius:12px;background:rgba(255,255,255,.05);text-align:center;color:#a9c6d8;font-size:10px}.rl-selected-point{filter:drop-shadow(0 0 9px rgba(37,99,235,.95))}
+@media(max-width:600px){.redline-popup .leaflet-popup-content{width:285px!important}.rl-map-popup{width:285px}}
+
+
+.personal-spot-panel{position:absolute;top:78px;right:12px;z-index:1000;width:320px;max-width:calc(100vw - 24px);background:rgba(7,18,38,.96);border:1px solid #ffffff18;border-radius:16px;padding:13px;box-shadow:0 15px 45px #0008;display:none}
+.personal-spot-panel.show{display:block}
+.personal-spot-panel h3{margin:0 0 9px;font-size:14px}.personal-spot-panel input{width:100%;height:38px;border-radius:9px;border:1px solid #ffffff18;background:#071226;color:#fff;padding:0 10px;margin-bottom:7px}
+.spot-row{display:flex;gap:7px}.spot-row button{flex:1;height:38px;border:0;border-radius:9px;cursor:pointer;color:#fff;background:#dc2626}.spot-row button.secondary{background:#ffffff12}
+.saved-spot{padding:9px;border-radius:10px;background:#ffffff08;margin-top:7px;cursor:pointer}.saved-spot b{display:block;font-size:11px}.saved-spot small{color:#94a3b8;font-size:9px}
+
+
+.trip-panel{position:absolute;top:78px;left:12px;z-index:1000;width:350px;max-width:calc(100vw - 24px);max-height:75vh;overflow:auto;background:rgba(7,18,38,.97);border:1px solid #ffffff18;border-radius:16px;padding:13px;box-shadow:0 15px 45px #0008;display:none}
+.trip-panel.show{display:block}.trip-panel h3{margin:0 0 10px;font-size:14px}.trip-field{margin-bottom:7px}.trip-field label{display:block;color:#94a3b8;font-size:9px;margin-bottom:4px}.trip-field input,.trip-field textarea,.trip-field select{width:100%;border-radius:9px;border:1px solid #ffffff18;background:#071226;color:#fff;padding:8px}.trip-field textarea{min-height:55px;resize:vertical}.trip-actions{display:flex;gap:7px}.trip-actions button{flex:1;border:0;border-radius:9px;padding:9px;cursor:pointer;color:#fff;background:#dc2626}.trip-actions .secondary{background:#ffffff12}.trip-item{background:#ffffff08;border-radius:11px;padding:10px;margin-top:8px}.trip-item b{font-size:11px}.trip-item small{display:block;color:#94a3b8;font-size:9px;line-height:1.6}.trip-delete{float:left;border:0;background:#ef4444;color:#fff;border-radius:6px;padding:3px 7px;cursor:pointer;font-size:9px}
+
+
+.forecast7-panel{position:absolute;bottom:78px;left:12px;right:12px;z-index:1000;background:rgba(7,18,38,.97);border:1px solid #ffffff18;border-radius:16px;padding:13px;box-shadow:0 15px 45px #0008;display:none;max-height:48vh;overflow:auto}
+.forecast7-panel.show{display:block}.forecast7-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.forecast7-head b{font-size:14px}.forecast7-grid{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:7px}.day7{background:#ffffff08;border-radius:12px;padding:10px;text-align:center}.day7 b{display:block;font-size:11px}.day7 small{display:block;color:#94a3b8;font-size:9px;line-height:1.7}.day7 strong{display:block;font-size:16px;margin:5px}
+@media(max-width:760px){.forecast7-panel{bottom:65px}.forecast7-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ===== Mobile optimization ===== */
+@media(max-width:760px){
+  body{overflow:hidden}
+  .sidebar{width:76px!important}
+  .sidebar-item{justify-content:center!important;padding-left:5px!important;padding-right:5px!important}
+  .sidebar-item span{display:none}
+  #map{min-height:100vh}
+  .glass-panel,.panel{max-width:calc(100vw - 88px)!important}
+  #weatherPanel,#layersPanel,#forecastPanel{max-width:calc(100vw - 88px)!important}
+  .leaflet-control-zoom{display:none}
+  .search-wrap{max-width:45vw}
+}
+@media(max-width:520px){
+  .sidebar{width:62px!important}
+  .glass-panel,.panel,#weatherPanel,#layersPanel,#forecastPanel{max-width:calc(100vw - 70px)!important}
+  .search-wrap{max-width:38vw}
+  .header-title{display:none}
+  .float-btn{width:40px!important;height:40px!important}
+}
+
+.ai-panel{position:absolute;right:12px;bottom:78px;z-index:1100;width:360px;max-width:calc(100vw - 24px);background:rgba(7,18,38,.98);border:1px solid #ffffff18;border-radius:18px;padding:13px;box-shadow:0 18px 50px #0009;display:none}.ai-panel.show{display:block}.ai-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}.ai-messages{height:210px;overflow:auto;padding:4px}.ai-msg{padding:8px 10px;border-radius:11px;margin:6px 0;font-size:11px;line-height:1.6;white-space:pre-wrap}.ai-msg.user{background:#dc2626;margin-right:20px}.ai-msg.bot{background:#ffffff08;margin-left:10px}.ai-input{display:flex;gap:7px;margin-top:8px}.ai-input input{flex:1;height:40px;border-radius:10px;border:1px solid #ffffff18;background:#071226;color:#fff;padding:0 10px}.ai-input button{width:48px;border:0;border-radius:10px;background:#dc2626;color:#fff}.ai-suggest{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.ai-suggest button{border:1px solid #ffffff18;background:#ffffff08;color:#fff;border-radius:9px;padding:6px 8px;font-size:9px}
+
+/* ===== EMBEDDED RED LINE BRAND / ICON SYSTEM ===== */
+.rl-brand{display:flex;align-items:center;gap:9px;min-width:190px}
+.rl-logo-svg{width:44px;height:44px;flex:0 0 44px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35))}
+.rl-wordmark{line-height:.9;white-space:nowrap}.rl-wordmark strong{font-size:19px;font-weight:950;font-style:italic;letter-spacing:-.5px}.rl-wordmark .red{color:#ef4444}.rl-wordmark .line{color:#fff}.rl-wordmark small{display:block;margin-top:5px;font-size:8px;letter-spacing:4px;color:#cbd5e1;font-weight:800}
+.rl-icon{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 18px;color:currentColor}
+.rl-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rl-nav{display:flex;align-items:center;gap:10px}
+@media(max-width:700px){.rl-brand{min-width:auto}.rl-wordmark strong{font-size:16px}.rl-wordmark small{font-size:7px;letter-spacing:3px}.rl-logo-svg{width:38px;height:38px;flex-basis:38px}}
+
+/* ===== OFFICIAL RED LINE FISHING LOGO ===== */
+.rl-logo-image{display:block;object-fit:cover;border-radius:24%;background:#071d35;box-shadow:0 6px 18px rgba(0,0,0,.30)}
+.rl-header-logo{width:44px;height:44px;flex:0 0 44px}
+.rl-auth-logo{width:86px;height:86px;border-radius:24%}
+@media(max-width:600px){.rl-header-logo{width:40px;height:40px;flex-basis:40px}.rl-auth-logo{width:78px;height:78px}}
