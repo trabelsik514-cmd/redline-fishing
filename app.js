@@ -119,12 +119,58 @@ var species=[
 var regNames={n:["Nord","الشمال"],c:["Centre","الوسط"],s:["Sud","الجنوب"]};
 var wavePts=[[37.3,9.9],[37.0,10.5],[36.7,11.0],[36.4,11.4],[36.0,11.5],[35.6,11.3],[35.2,11.2],[34.7,11.1],[34.1,11.0],[33.5,11.0]];
 function toggleWaves(){
-if(waveGroup&&map.hasLayer(waveGroup)){map.removeLayer(waveGroup);waveGroup=null;return}
-fetch('https://api.open-meteo.com/v1/marine?latitude=37.3,37,36.7,36.4,36,35.6,35.2,34.7,34.1,33.5&longitude=9.9,10.5,11,11.4,11.5,11.3,11.2,11.1,11,11&current=wave_height')
-.then(function(r){return r.json()}).then(function(res){var arr=Array.isArray(res)?res:[res];
-waveGroup=L.layerGroup(arr.map(function(d,i){var h=(d.current&&d.current.wave_height)||0;
-var col=h<0.5?'#22c55e':h<1?'#eab308':h<1.5?'#f97316':'#dc2626';
-return L.circleMarker(wavePts[i],{radius:16,color:col,fillColor:col,fillOpacity:.45,weight:1}).bindPopup('🌊 '+h.toFixed(2)+' m')})).addTo(map)}).catch(function(e){console.log(e)})}
+    if(waveGroup && map.hasLayer(waveGroup)){
+        map.removeLayer(waveGroup);
+        waveGroup=null;
+        return;
+    }
+
+    var url='https://marine-api.open-meteo.com/v1/marine?'+
+        'latitude=37.3,37,36.7,36.4,36,35.6,35.2,34.7,34.1,33.5&'+
+        'longitude=9.9,10.5,11,11.4,11.5,11.3,11.2,11.1,11,11&'+
+        'current=wave_height&timezone=auto';
+
+    fetch(url)
+        .then(function(r){
+            if(!r.ok) throw new Error('Marine API '+r.status);
+            return r.json();
+        })
+        .then(function(res){
+            var arr=Array.isArray(res)?res:[res];
+
+            waveGroup=L.layerGroup(
+                arr.map(function(d,i){
+                    var h=(d.current && d.current.wave_height!=null)
+                        ? Number(d.current.wave_height)
+                        : 0;
+
+                    var col=
+                        h<0.5 ? '#22c55e' :
+                        h<1.0 ? '#eab308' :
+                        h<1.5 ? '#f97316' :
+                        '#dc2626';
+
+                    return L.circleMarker(wavePts[i],{
+                        radius:16,
+                        color:col,
+                        fillColor:col,
+                        fillOpacity:.45,
+                        weight:2
+                    }).bindPopup(
+                        '🌊 '+h.toFixed(2)+' m'
+                    );
+                })
+            ).addTo(map);
+        })
+        .catch(function(e){
+            console.log('Wave API error:',e);
+            alert(
+                lang==='ar'
+                ? '❌ تعذر تحميل بيانات الأمواج'
+                : '❌ Impossible de charger les données des vagues'
+            );
+        });
+}
 
 
 var portsLayer=L.layerGroup(), portsVisible=false, activePort=null;
