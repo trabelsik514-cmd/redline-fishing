@@ -471,12 +471,21 @@ var md=m.daily||{};
 
 var nd=(c.wind_speed_10m/1.852).toFixed(1);
 
-var wave=(
+var wave='--';
+
+if(
     mc.wave_height!==undefined &&
     mc.wave_height!==null
-)
-? Number(mc.wave_height).toFixed(2)
-: '--';
+){
+    wave=Number(mc.wave_height).toFixed(2);
+}
+else if(
+    md.wave_height_max &&
+    md.wave_height_max[0]!==undefined &&
+    md.wave_height_max[0]!==null
+){
+    wave=Number(md.wave_height_max[0]).toFixed(2);
+}
 
 document.getElementById('liveData').innerHTML=
 '🌬️ '+nd+' nd • 🌡️ '+c.temperature_2m+'°C • 🌊 '+wave+' m • 💨 '+((c.wind_gusts_10m||0)/1.852).toFixed(0)+' nd';
