@@ -129,8 +129,8 @@ return L.circleMarker(wavePts[i],{radius:16,color:col,fillColor:col,fillOpacity:
 
 var portsLayer=L.layerGroup(), portsVisible=false, activePort=null;
 var tunisianPorts=[
- {ar:'ميناء بنزرت',fr:'Port de Bizerte',lat:37.27,lon:9.87},
- {ar:'ميناء حلق الوادي',fr:'Port de La Goulette',lat:36.81,lon:10.30},
+{ar:'ميناء بنزرت',fr:'Port de Bizerte',lat:37.27,lon:9.87},
+{ar:'ميناء حلق الوادي',fr:'Port de La Goulette',lat:36.81,lon:10.30},
  {ar:'ميناء قليبية',fr:'Port de Kélibia',lat:36.85,lon:11.10},
  {ar:'ميناء الحمامات',fr:'Port de Hammamet',lat:36.40,lon:10.62},
  {ar:'ميناء سوسة',fr:'Port de Sousse',lat:35.83,lon:10.64},
