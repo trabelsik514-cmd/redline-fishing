@@ -119,59 +119,95 @@ var species=[
 var regNames={n:["Nord","الشمال"],c:["Centre","الوسط"],s:["Sud","الجنوب"]};
 var wavePts=[[37.3,9.9],[37.0,10.5],[36.7,11.0],[36.4,11.4],[36.0,11.5],[35.6,11.3],[35.2,11.2],[34.7,11.1],[34.1,11.0],[33.5,11.0]];
 function toggleWaves(){
+
     if(waveGroup && map.hasLayer(waveGroup)){
         map.removeLayer(waveGroup);
         waveGroup=null;
         return;
     }
 
-    var url='https://marine-api.open-meteo.com/v1/marine?'+
-        'latitude=37.3,37,36.7,36.4,36,35.6,35.2,34.7,34.1,33.5&'+
-        'longitude=9.9,10.5,11,11.4,11.5,11.3,11.2,11.1,11,11&'+
-        'current=wave_height&timezone=auto';
+    waveGroup=L.layerGroup().addTo(map);
 
-    fetch(url)
-        .then(function(r){
-            if(!r.ok) throw new Error('Marine API '+r.status);
-            return r.json();
-        })
-        .then(function(res){
-            var arr=Array.isArray(res)?res:[res];
+    var requests=[];
 
-            waveGroup=L.layerGroup(
-                arr.map(function(d,i){
-                    var h=(d.current && d.current.wave_height!=null)
-                        ? Number(d.current.wave_height)
-                        : 0;
+    for(var i=0;i<wavePts.length;i++){
 
-                    var col=
-                        h<0.5 ? '#22c55e' :
-                        h<1.0 ? '#eab308' :
-                        h<1.5 ? '#f97316' :
-                        '#dc2626';
+        var lat=wavePts[i][0];
+        var lon=wavePts[i][1];
 
-                    return L.circleMarker(wavePts[i],{
-                        radius:16,
-                        color:col,
-                        fillColor:col,
-                        fillOpacity:.45,
-                        weight:2
-                    }).bindPopup(
-                        '🌊 '+h.toFixed(2)+' m'
-                    );
-                })
-            ).addTo(map);
-        })
-        .catch(function(e){
-            console.log('Wave API error:',e);
-            alert(
-                lang==='ar'
-                ? '❌ تعذر تحميل بيانات الأمواج'
-                : '❌ Impossible de charger les données des vagues'
-            );
+        var url=
+            'https://marine-api.open-meteo.com/v1/marine?'+
+            'latitude='+lat+
+            '&longitude='+lon+
+            '&current=wave_height,wave_direction,wave_period'+
+            '&timezone=auto';
+
+        requests.push(
+            fetch(url)
+            .then(function(r){
+                if(!r.ok){
+                    throw new Error('Marine API '+r.status);
+                }
+                return r.json();
+            })
+        );
+    }
+
+    Promise.all(requests)
+    .then(function(results){
+
+        results.forEach(function(d,i){
+
+            var h='--';
+
+            if(
+                d &&
+                d.current &&
+                d.current.wave_height !== undefined &&
+                d.current.wave_height !== null
+            ){
+                h=Number(d.current.wave_height).toFixed(2);
+            }
+
+            var value=(h==='--') ? 0 : Number(h);
+
+            var col=
+                value<0.5 ? '#22c55e' :
+                value<1.0 ? '#eab308' :
+                value<1.5 ? '#f97316' :
+                '#dc2626';
+
+            L.circleMarker(wavePts[i],{
+                radius:16,
+                color:col,
+                fillColor:col,
+                fillOpacity:.45,
+                weight:2
+            })
+            .bindPopup(
+                '<b>🌊 Vagues</b><br>'+
+                'Hauteur : <strong>'+h+' m</strong>'
+            )
+            .addTo(waveGroup);
         });
-}
 
+    })
+    .catch(function(e){
+
+        console.log('Wave API error:',e);
+
+        if(waveGroup){
+            map.removeLayer(waveGroup);
+            waveGroup=null;
+        }
+
+        alert(
+            lang==='ar'
+            ? '❌ تعذر تحميل بيانات الأمواج'
+            : '❌ Impossible de charger les données des vagues'
+        );
+    });
+}
 
 var portsLayer=L.layerGroup(), portsVisible=false, activePort=null;
 var tunisianPorts=[
