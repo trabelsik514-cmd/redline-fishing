@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020617">
+<title>Fishing Planner — Red Line Fishing</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#020617;color:#f8fafc;font-family:Arial,Tahoma,sans-serif}
+.app{max-width:1150px;margin:auto;padding:14px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.brand{display:flex;gap:10px;align-items:center}.logo{width:46px;height:46px;border-radius:14px;background:#dc2626;display:grid;place-items:center;font-size:24px}
+h1{font-size:20px;margin:0}.brand small{color:#94a3b8;letter-spacing:2px}.hero,.card{background:rgba(10,20,40,.94);border:1px solid #ffffff18;border-radius:20px;padding:16px;box-shadow:0 12px 40px #0005}
+.hero{margin-bottom:14px}.hero h2{margin:0 0 6px}.hero p{color:#aab8c8;font-size:13px;line-height:1.7;margin:0}
+.grid{display:grid;grid-template-columns:1fr 180px 150px;gap:9px;margin-top:15px}.field label{display:block;color:#94a3b8;font-size:11px;margin-bottom:5px}
+input,button{font:inherit}.input,.btn{width:100%;height:44px;border-radius:11px;border:1px solid #ffffff18;background:#071226;color:#fff;padding:0 12px}
+.btn{cursor:pointer}.primary{background:#dc2626;border:0;font-weight:bold}.results{position:absolute;z-index:20;left:0;right:0;top:64px;background:#071226;border:1px solid #ffffff18;border-radius:12px;overflow:hidden;display:none}
+.field{position:relative}.result{padding:11px;border-bottom:1px solid #ffffff0b;cursor:pointer}.result small{display:block;color:#94a3b8;margin-top:3px}
+.status{color:#94a3b8;font-size:12px;margin-top:9px;min-height:16px}.hidden{display:none!important}
+.dashboard{display:grid;grid-template-columns:1fr 1fr;gap:14px}.score{text-align:center}.big{font-size:62px;font-weight:900;line-height:1;margin:12px 0 5px}.big span{font-size:18px;color:#94a3b8}
+.bar{height:8px;background:#ffffff10;border-radius:99px;overflow:hidden;margin:12px auto;width:90%}.bar i{display:block;height:100%}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:14px}.metric{background:#ffffff08;border-radius:12px;padding:9px;text-align:center}.metric small{display:block;color:#94a3b8;font-size:9px;margin:3px}.metric b{font-size:12px}
+.title{font-weight:bold;margin-bottom:12px}.hours{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.hour{background:#ffffff07;border:1px solid #ffffff0d;border-radius:14px;padding:11px;text-align:center}.hour strong{font-size:19px;display:block;margin:5px}.hour small{color:#94a3b8;font-size:9px;line-height:1.6}.best{border-color:#22c55e66}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.detail{background:#ffffff07;border-radius:12px;padding:11px}.detail small{display:block;color:#94a3b8;font-size:9px}.detail b{display:block;margin-top:5px}
+.alert{margin-top:12px;padding:10px;border-radius:11px;font-size:11px;line-height:1.6}.safe{background:#22c55e14;color:#bbf7d0}.warn{background:#f59e0b14;color:#fde68a}.danger{background:#ef444414;color:#fecaca}
+.moon{display:flex;align-items:center;gap:12px;margin-top:14px}.moonicon{font-size:42px}.moon small{color:#94a3b8;display:block}
+#map{height:280px;border-radius:14px;overflow:hidden}.footer{text-align:center;color:#64748b;font-size:9px;padding:16px}
+@media(max-width:760px){.grid,.dashboard{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.hours{grid-template-columns:1fr}.app{padding:9px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+<div class="brand"><div class="logo">🎣</div><div><h1>RED LINE FISHING</h1><small>FISHING PLANNER</small></div></div>
+<button class="btn" style="width:auto;padding:0 12px" id="lang" onclick="toggleLang()">🌐 FR</button>
+</header>
+<section class="hero">
+<h2 id="title">🎣 مخطط الصيد الذكي</h2>
+<p id="subtitle">اكتب اسم المنطقة، اختر التاريخ، وسنحلل الطقس والبحر ونحدد أفضل ساعات الصيد.</p>
+<div class="grid">
+<div class="field"><label id="plabel">📍 منطقة الصيد</label><input id="place" class="input" placeholder="مثال: بنزرت، خليج الحمامات..." autocomplete="off"><div id="results" class="results"></div></div>
+<div><label id="dlabel">📅 التاريخ</label><input id="date" class="input" type="date"></div>
+<div style="display:flex;align-items:end"><button id="go" class="btn primary" onclick="analyze()">🎯 تحليل الصيد</button></div>
+</div><div id="status" class="status"></div>
+</section>
+<section id="empty" class="card">🎣 اكتب المنطقة واختر التاريخ ثم اضغط «تحليل الصيد».</section>
+<main id="dash" class="dashboard hidden">
+<section class="card score">
+<div id="scoretitle">🎯 مؤشر ملاءمة ظروف الصيد</div><div id="score" class="big">--<span>/100</span></div><b id="state">--</b><div class="bar"><i id="bar"></i></div><div id="loc"></div>
+<div class="metrics">
+<div class="metric">🌬️<small>الرياح</small><b id="wind">--</b></div>
+<div class="metric">💨<small>الهبات</small><b id="gust">--</b></div>
+<div class="metric">🌊<small>الأمواج</small><b id="wave">--</b></div>
+<div class="metric">🌡️<small>الحرارة</small><b id="temp">--</b></div>
+</div><div id="alert" class="alert"></div>
+</section>
+<section class="card"><div class="title" id="hoursTitle">🕐 أفضل 3 ساعات للصيد</div><div id="hours" class="hours"></div>
+<div class="title" style="margin-top:18px">🌊 تفاصيل البحر والطقس</div>
+<div class="details">
+<div class="detail"><small>🧭 اتجاه الرياح</small><b id="wdir">--</b></div>
+<div class="detail"><small>📈 الضغط</small><b id="pressure">--</b></div>
+<div class="detail"><small>🌧️ الأمطار</small><b id="rain">--</b></div>
+<div class="detail"><small>💧 الرطوبة</small><b id="hum">--</b></div>
+</div></section>
+<section class="card"><div class="title">☀️ الشمس والقمر</div><div class="details">
+<div class="detail"><small>🌅 الشروق</small><b id="sunrise">--</b></div><div class="detail"><small>🌇 الغروب</small><b id="sunset">--</b></div></div>
+<div class="moon"><div id="moonicon" class="moonicon">🌙</div><div><b id="moonname">--</b><small id="moonillum">--</small></div></div></section>
+<section class="card"><div class="title">🗺️ موقع الصيد</div><div id="map"></div><button class="btn primary" style="margin-top:9px" onclick="openMap()">📍 فتح في الخريطة الرئيسية</button></section>
+</main>
+<div class="footer">RED LINE FISHING • المؤشر يقيّم الظروف ولا يضمن وجود الأسماك.</div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const GEO="https://geocoding-api.open-meteo.com/v1/search", WEATHER="https://api.open-meteo.com/v1/forecast", MARINE="https://marine-api.open-meteo.com/v1/marine";
+let lang="ar",selected=null,map=null,marker=null,last=null;
+const $=x=>document.getElementById(x), esc=x=>String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+
+// ===== استقبال المنطقة من الخريطة الرئيسية =====
+const plannerParams=new URLSearchParams(window.location.search);
+const incomingLat=Number(plannerParams.get("lat"));
+const incomingLon=Number(plannerParams.get("lon"));
+const incomingName=plannerParams.get("name");
+const incomingCountry=plannerParams.get("country")||"Tunisie";
+const incomingDate=plannerParams.get("date");
+
+const today=new Date().toISOString().slice(0,10);
+$("date").value=incomingDate||today;
+$("date").min=today;
+
+// إذا فتح مخطط الصيد من زر "تحليل الصيد" في الخريطة، نختار المنطقة ونبدأ التحليل تلقائيا
+if(
+    incomingName &&
+    Number.isFinite(incomingLat) &&
+    Number.isFinite(incomingLon)
+){
+    selected={
+        lat:incomingLat,
+        lon:incomingLon,
+        name:incomingName,
+        country:incomingCountry
+    };
+
+    $("place").value=incomingName;
+
+    $("status").textContent=
+        "📍 "+incomingName+" — جاري تجهيز التحليل...";
+
+    // ننتظر تحميل الصفحة ثم نبدأ التحليل
+    setTimeout(function(){
+        analyze();
+    },500);
+}
+
+function toggleLang(){lang=lang==="ar"?"fr":"ar";$("lang").textContent=lang==="ar"?"🌐 FR":"🌐 AR";document.documentElement.dir=lang==="ar"?"rtl":"ltr";$("title").textContent=lang==="ar"?"🎣 مخطط الصيد الذكي":"🎣 Planificateur de pêche";$("subtitle").textContent=lang==="ar"?"اكتب اسم المنطقة، اختر التاريخ، وسنحلل الطقس والبحر ونحدد أفضل ساعات الصيد.":"Saisissez une zone et une date pour analyser la météo, la mer et les meilleures heures.";$("plabel").textContent=lang==="ar"?"📍 منطقة الصيد":"📍 Zone de pêche";$("dlabel").textContent=lang==="ar"?"📅 التاريخ":"📅 Date";$("go").textContent=lang==="ar"?"🎯 تحليل الصيد":"🎯 Analyser";$("hoursTitle").textContent=lang==="ar"?"🕐 أفضل 3 ساعات للصيد":"🕐 3 meilleures heures";}
+let timer;
+$("place").oninput=()=>{clearTimeout(timer);let q=$("place").value.trim();if(q.length<2){$("results").style.display="none";return}timer=setTimeout(()=>search(q),300)};
+async function search(q){try{let d=await fetch(GEO+"?name="+encodeURIComponent(q)+"&count=6&language="+lang+"&format=json").then(r=>r.json());$("results").innerHTML="";(d.results||[]).forEach(x=>{let e=document.createElement("div");e.className="result";e.innerHTML="<b>"+esc(x.name)+"</b><small>"+esc(x.admin1||"")+" • "+esc(x.country||"")+"</small>";e.onclick=()=>{selected={lat:x.latitude,lon:x.longitude,name:x.name,country:x.country||""};$("place").value=x.name+" — "+(x.country||"");$("results").style.display="none"};$("results").appendChild(e)});$("results").style.display=d.results?.length?"block":"none"}catch(e){}}
+function score(w,g,v,t){return Math.round(Math.min(100,(w<=8?30:w<=12?25:w<=16?17:w<=22?8:0)+(g<=12?20:g<=18?15:g<=25?8:0)+(v<=.5?30:v<=1?25:v<=1.5?17:v<=2?8:0)+(t>=14&&t<=28?20:t>=9&&t<=32?14:7)))}
+function state(s){return s>=85?["🟢",lang==="ar"?"ممتاز":"Excellent","#22c55e"]:s>=70?["🟢",lang==="ar"?"جيد جدًا":"Très bon","#4ade80"]:s>=50?["🟡",lang==="ar"?"متوسط":"Moyen","#facc15"]:s>=30?["🟠",lang==="ar"?"يحتاج حذرًا":"Prudence","#fb923c"]:["🔴",lang==="ar"?"ظروف صعبة":"Difficile","#ef4444"]}
+function moon(date){let days=(new Date(date+"T12:00:00Z").getTime()/86400000)-10950,age=((days%29.530588853)+29.530588853)%29.530588853,illum=Math.round((1-Math.cos(age/29.530588853*2*Math.PI))/2*100);let a=age<1.85?["🌑","محاق"]:age<7.38?["🌒","هلال متزايد"]:age<9.23?["🌓","تربيع أول"]:age<14.77?["🌔","أحدب متزايد"]:age<16.62?["🌕","بدر"]:age<22.15?["🌖","أحدب متناقص"]:age<23.99?["🌗","تربيع أخير"]:["🌘","هلال متناقص"];if(lang==="fr"){a[1]=age<1.85?"Nouvelle lune":age<7.38?"Premier croissant":age<9.23?"Premier quartier":age<14.77?"Gibbeuse croissante":age<16.62?"Pleine lune":age<22.15?"Gibbeuse décroissante":age<23.99?"Dernier quartier":"Dernier croissant"}return[a[0],a[1],illum]}
+function dir(d){if(d==null)return"--";let a=lang==="ar"?["شمال","شمال شرقي","شرق","جنوب شرقي","جنوب","جنوب غربي","غرب","شمال غربي"]:["N","NE","E","SE","S","SO","O","NO"];return a[Math.round(d/45)%8]}
+async function analyze(){
+ if(!selected){$("status").textContent=lang==="ar"?"اختر منطقة من النتائج أولاً.":"Choisissez une zone.";return}
+ let date=$("date").value;$("status").textContent=lang==="ar"?"⏳ جاري التحليل...":"⏳ Analyse...";
+ $("go").disabled=true;
+ try{
+  let q=`latitude=${selected.lat}&longitude=${selected.lon}&timezone=auto&start_date=${date}&end_date=${date}`;
+  let w=await fetch(WEATHER+"?"+q+"&hourly=temperature_2m,relative_humidity_2m,pressure_msl,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m&daily=sunrise,sunset").then(r=>r.json());
+  let m={hourly:{}};try{m=await fetch(MARINE+"?"+q+"&hourly=wave_height,wave_direction,wave_period").then(r=>r.json())}catch(e){}
+  render(w,m,date);$("status").textContent="";
+ }catch(e){console.error(e);$("status").textContent=lang==="ar"?"❌ تعذر جلب البيانات.":"❌ Impossible de récupérer les données."}finally{$("go").disabled=false}
+}
+function render(w,m,date){
+ let h=w.hourly||{},mh=m.hourly||{},rows=[];for(let i=0;i<(h.time||[]).length;i++){let a=Number(h.wind_speed_10m?.[i]||0)/1.852,b=Number(h.wind_gusts_10m?.[i]||a)/1.852,c=Number(mh.wave_height?.[i]??1.2),t=Number(h.temperature_2m?.[i]??20);rows.push({i,s:score(a,b,c,t),a,b,c,t})}
+ let now=rows.find(x=>x.i===new Date().getHours())||rows[0],best=[...rows].sort((a,b)=>b.s-a.s).slice(0,3),st=state(now.s);
+ $("empty").classList.add("hidden");$("dash").classList.remove("hidden");$("score").innerHTML=now.s+"<span>/100</span>";$("score").style.color=st[2];$("bar").style.width=now.s+"%";$("bar").style.background=st[2];$("state").textContent=st[0]+" "+st[1];$("state").style.color=st[2];$("loc").textContent="📍 "+selected.name+" • "+selected.country+" — "+date;
+ $("wind").textContent=now.a.toFixed(1)+" nd";$("gust").textContent=now.b.toFixed(0)+" nd";$("wave").textContent=now.c.toFixed(2)+" m";$("temp").textContent=now.t.toFixed(1)+" °C";
+ $("hours").innerHTML=best.map((x,j)=>{let z=state(x.s),time=(h.time[x.i]||"").slice(11,16);return `<div class="hour ${j===0?"best":""}">${["🥇","🥈","🥉"][j]}<strong>${time}</strong><b style="color:${z[2]}">${x.s}/100</b><small>${z[0]} ${z[1]}<br>🌬️ ${x.a.toFixed(1)} nd • 🌊 ${x.c.toFixed(2)} m</small></div>`}).join("");
+ $("wdir").textContent=dir(Number(h.wind_direction_10m?.[now.i]));$("pressure").textContent=h.pressure_msl?.[now.i]?Number(h.pressure_msl[now.i]).toFixed(0)+" hPa":"--";$("rain").textContent=h.precipitation?.[now.i]!=null?Number(h.precipitation[now.i]).toFixed(1)+" mm":"--";$("hum").textContent=h.relative_humidity_2m?.[now.i]!=null?Number(h.relative_humidity_2m[now.i]).toFixed(0)+" %":"--";
+ $("sunrise").textContent=(w.daily?.sunrise?.[0]||"").slice(11,16)||"--";$("sunset").textContent=(w.daily?.sunset?.[0]||"").slice(11,16)||"--";let mo=moon(date);$("moonicon").textContent=mo[0];$("moonname").textContent=mo[1];$("moonillum").textContent=(lang==="ar"?"الإضاءة التقريبية: ":"Éclairage approx.: ")+mo[2]+"%";
+ $("alert").className="alert "+(now.s>=70?"safe":now.s>=45?"warn":"danger");$("alert").textContent=now.s>=70?(lang==="ar"?"🟢 الظروف الحالية مناسبة نسبيًا للصيد. راقب تغير الرياح والأمواج.":"🟢 Conditions assez favorables. Surveillez les changements."):now.s>=45?(lang==="ar"?"🟡 الظروف متوسطة؛ افحص البحر قبل الانطلاق.":"🟡 Conditions moyennes; vérifiez la mer avant le départ."):(lang==="ar"?"🔴 الظروف صعبة وفق البيانات الحالية.":"🔴 Conditions difficiles selon les données.");
+ last={lat:selected.lat,lon:selected.lon};setMap(selected.lat,selected.lon)
+}
+function setMap(lat,lon){if(!map){map=L.map("map").setView([lat,lon],9);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map)}else map.setView([lat,lon],9);if(marker)marker.remove();marker=L.marker([lat,lon]).addTo(map).bindPopup("🎣 "+esc(selected.name)).openPopup();setTimeout(()=>map.invalidateSize(),200)}
+function openMap(){if(last)location.href=`index.html?lat=${last.lat}&lon=${last.lon}&name=${encodeURIComponent(selected?.name||"")}`}
+</script>
+</body>
+</html>
