@@ -448,7 +448,33 @@ function fetchWeather(){
 
 var url='https://api.open-meteo.com/v1/forecast?latitude='+currentLat+'&longitude='+currentLon+'&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code&timezone=auto';
 
-var marineUrl='https://marine-api.open-meteo.com/v1/marine?latitude='+currentLat+'&longitude='+currentLon+'&current=wave_height,wave_direction,wave_period&daily=wave_height_max&timezone=auto';
+var waveLat=currentLat;
+var waveLon=currentLon;
+
+var nearestWavePoint=wavePts[0];
+var nearestDistance=Infinity;
+
+for(var wi=0;wi<wavePts.length;wi++){
+
+    var dlat=currentLat-wavePts[wi][0];
+    var dlon=currentLon-wavePts[wi][1];
+    var dist=(dlat*dlat)+(dlon*dlon);
+
+    if(dist<nearestDistance){
+        nearestDistance=dist;
+        nearestWavePoint=wavePts[wi];
+    }
+}
+
+waveLat=nearestWavePoint[0];
+waveLon=nearestWavePoint[1];
+
+var marineUrl=
+'https://marine-api.open-meteo.com/v1/marine?latitude='+
+waveLat+
+'&longitude='+
+waveLon+
+'&current=wave_height,wave_direction,wave_period&daily=wave_height_max&timezone=auto';
 
 Promise.all([
     fetch(url).then(function(r){
