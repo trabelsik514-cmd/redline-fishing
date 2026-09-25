@@ -408,27 +408,141 @@ accuracyCache[key]={time:Date.now(),score:score,windMAE:wm,tempMAE:tm};updateAcc
 }catch(e){console.log('Accuracy engine:',e);document.getElementById('accuracyScore').textContent='--%';document.getElementById('accuracyBar').style.width='0%';document.getElementById('accuracyStatus').textContent=lang==='ar'?'⚪ لا توجد بيانات تحقق كافية حالياً':'⚪ Données de vérification insuffisantes'}
 }
 
-
 function fetchWeather(){
-var url='https://api.open-meteo.com/v1/forecast?latitude='+currentLat+'&longitude='+currentLon+'&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&daily=wave_height_max,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code&timezone=auto';
-fetch(url).then(function(r){return r.json()}).then(function(d){
-var c=d.current,nd=(c.wind_speed_10m/1.852).toFixed(1);
-document.getElementById('liveData').innerHTML='>🌬️ '+nd+' nd • 🌡️ '+c.temperature_2m+'°C • 💨 '+((c.wind_gusts_10m||0)/1.852).toFixed(0)+' nd</p>';
-document.getElementById('tempVal').textContent=c.temperature_2m+'°C';
-document.getElementById('windVal').textContent=nd+' nd';
-document.getElementById('waveVal').textContent=(d.daily.wave_height_max[0]||'--')+' m';
-var ar=document.getElementById('windArrow');
-if(ar){ar.style.transform='translate(-50%,-100%) rotate('+c.wind_direction_10m+'deg)'}
-var ci=document.getElementById('compassInfo');
-if(ci){ci.innerHTML='<p class="font-bold text-sm">'+windDirName(c.wind_direction_10m)+' • '+nd+' nd</p><p class="text-gray-400">💨 الهبّات: '+((c.wind_gusts_10m||0)/1.852).toFixed(0)+' nd</p><p>'+(nd<15?'✅ ظروف آمنة للصيد':'⚠️ رياح قوية — احذر!')+'</p>'}
-var days=(lang==='ar')?['أحد','إثن','ثلا','أرب','خمي','جمع','سبت']:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],html='';
-for(var i=0;i<7;i++){var day=new Date(d.daily.time[i]);
-html+='<div class="glass rounded-lg p-1.5"><p class="text-gray-400">'+days[day.getDay()]+'</p><p class="text-lg">'+weatherIcon(d.daily.weather_code[i])+'</p><p class="font-bold">'+d.daily.temperature_2m_max[i]+'°</p><p class="text-gray-400">'+d.daily.temperature_2m_min[i]+'°</p><p class="text-[10px] text-blue-300">🌬️'+(d.daily.wind_speed_10m_max[i]/1.852).toFixed(0)+'nd</p><p class="text-[10px] text-cyan-300">🌊'+(d.daily.wave_height_max[i]||'--')+'m</p></div>'}
-document.getElementById('forecastContent').innerHTML=html;
-fetchHourly();measureForecastAccuracy();
-}).catch(function(){document.getElementById('liveData').innerHTML='<p class="text-red-400">⚠️ Erreur connexion</p>'})}
-fetchWeather();setInterval(fetchWeather,600000);setInterval(function(){measureForecastAccuracy()},3600000);
 
+var url='https://api.open-meteo.com/v1/forecast?latitude='+currentLat+'&longitude='+currentLon+'&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code&timezone=auto';
+
+var marineUrl='https://marine-api.open-meteo.com/v1/marine?latitude='+currentLat+'&longitude='+currentLon+'&current=wave_height,wave_direction,wave_period&daily=wave_height_max&timezone=auto';
+
+Promise.all([
+    fetch(url).then(function(r){
+        if(!r.ok) throw new Error('Weather API '+r.status);
+        return r.json();
+    }),
+    fetch(marineUrl).then(function(r){
+        if(!r.ok) throw new Error('Marine API '+r.status);
+        return r.json();
+    })
+])
+.then(function(results){
+
+var d=results[0];
+var m=results[1];
+
+var c=d.current;
+var mc=m.current||{};
+var md=m.daily||{};
+
+var nd=(c.wind_speed_10m/1.852).toFixed(1);
+
+var wave=(
+    mc.wave_height!==undefined &&
+    mc.wave_height!==null
+)
+? Number(mc.wave_height).toFixed(2)
+: '--';
+
+document.getElementById('liveData').innerHTML=
+'🌬️ '+nd+' nd • 🌡️ '+c.temperature_2m+'°C • 🌊 '+wave+' m • 💨 '+((c.wind_gusts_10m||0)/1.852).toFixed(0)+' nd';
+
+document.getElementById('tempVal').textContent=
+c.temperature_2m+'°C';
+
+document.getElementById('windVal').textContent=
+nd+' nd';
+
+document.getElementById('waveVal').textContent=
+wave+' m';
+
+var ar=document.getElementById('windArrow');
+
+if(ar){
+ar.style.transform=
+'translate(-50%,-100%) rotate('+c.wind_direction_10m+'deg)';
+}
+
+var ci=document.getElementById('compassInfo');
+
+if(ci){
+ci.innerHTML=
+'<p class="font-bold text-sm">'+
+windDirName(c.wind_direction_10m)+
+' • '+nd+' nd</p>'+
+'<p class="text-gray-400">💨 الهبّات: '+
+((c.wind_gusts_10m||0)/1.852).toFixed(0)+
+' nd</p>'+
+'<p>🌊 الأمواج: '+wave+' m</p>'+
+'<p>'+
+(nd<15?'✅ ظروف آمنة للصيد':'⚠️ رياح قوية — احذر!')+
+'</p>';
+}
+
+var days=(lang==='ar')
+?['أحد','إثن','ثلا','أرب','خمي','جمع','سبت']
+:['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+var html='';
+
+for(var i=0;i<7;i++){
+
+var day=new Date(d.daily.time[i]);
+
+var dailyWave='--';
+
+if(
+md.wave_height_max &&
+md.wave_height_max[i]!==undefined &&
+md.wave_height_max[i]!==null
+){
+dailyWave=Number(md.wave_height_max[i]).toFixed(2);
+}
+
+html+=
+'<div class="glass rounded-lg p-1.5">'+
+'<p class="text-gray-400">'+
+days[day.getDay()]+
+'</p>'+
+'<p class="text-lg">'+
+weatherIcon(d.daily.weather_code[i])+
+'</p>'+
+'<p class="font-bold">'+
+d.daily.temperature_2m_max[i]+'°'+
+'</p>'+
+'<p class="text-gray-400">'+
+d.daily.temperature_2m_min[i]+'°'+
+'</p>'+
+'<p class="text-[10px] text-blue-300">🌬️'+
+(d.daily.wind_speed_10m_max[i]/1.852).toFixed(0)+
+'nd</p>'+
+'<p class="text-[10px] text-cyan-300">🌊'+
+dailyWave+
+'m</p>'+
+'</div>';
+}
+
+document.getElementById('forecastContent').innerHTML=html;
+
+fetchHourly();
+measureForecastAccuracy();
+
+})
+.catch(function(error){
+
+console.log('Weather/Marine API error:',error);
+
+document.getElementById('liveData').innerHTML=
+'<p class="text-red-400">⚠️ Erreur connexion météo/mer</p>';
+
+});
+}
+
+fetchWeather();
+
+setInterval(fetchWeather,600000);
+
+setInterval(function(){
+measureForecastAccuracy();
+},3600000);
 function myLocation(){
 if(!navigator.geolocation){alert('⚠️ GPS غير مدعوم');return}
 var box=document.getElementById('sunBox');
