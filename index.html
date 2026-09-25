@@ -154,5 +154,31 @@
 <div class="space-y-2 text-sm" id="favList"></div>
 </div>
 </div>
+  <!-- مساعد الصياد AI -->
+<div id="aiPanel" class="ai-panel">
+
+    <div class="ai-header">
+        <span>🤖 مساعد الصياد AI</span>
+        <button onclick="toggleAI()">✕</button>
+    </div>
+
+    <div id="aiMessages" class="ai-messages"></div>
+
+    <div class="ai-input-box">
+
+        <input
+            id="aiInput"
+            type="text"
+            placeholder="اسأل مساعد الصياد..."
+            onkeydown="if(event.key==='Enter') sendAI()"
+        >
+
+        <button onclick="sendAI()">➤</button>
+
+    </div>
+
+</div>
+
+<script src="app.js"></script>
 <script src="app.js"></script></body>
 </html>
