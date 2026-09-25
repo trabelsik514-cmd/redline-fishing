@@ -381,7 +381,128 @@ window.addEventListener('resize',function(){
   if(map)setTimeout(function(){map.invalidateSize()},150);
 });
 setTimeout(setupMobileUX,800);
+var aiOpen=false;
 
+function toggleAI(){
+
+    aiOpen=!aiOpen;
+
+    var p=document.getElementById("aiPanel");
+
+    if(!p)return;
+
+    p.classList.toggle("show",aiOpen);
+
+    if(
+        aiOpen &&
+        document.getElementById("aiMessages") &&
+        !document.getElementById("aiMessages").children.length
+    ){
+        addAI(
+            "bot",
+            "مرحبًا 👋 أنا مساعد الصياد في Red Line Fishing.\n"+
+            "اطلب مني حالة الطقس والرياح والأمواج في أي مكان."
+        );
+    }
+}
+
+function addAI(type,text){
+
+    var box=document.getElementById("aiMessages");
+
+    if(!box)return;
+
+    var d=document.createElement("div");
+
+    d.className="ai-msg "+type;
+
+    d.textContent=text;
+
+    box.appendChild(d);
+
+    box.scrollTop=box.scrollHeight;
+}
+
+function askAI(question){
+
+    var input=document.getElementById("aiInput");
+
+    if(!input)return;
+
+    input.value=question;
+
+    sendAI();
+}
+
+async function sendAI(){
+
+    var input=document.getElementById("aiInput");
+
+    if(!input)return;
+
+    var question=input.value.trim();
+
+    if(!question)return;
+
+    input.value="";
+
+    addAI("user",question);
+
+    addAI("bot","⏳ جاري البحث عن بيانات الطقس والبحر...");
+
+    try{
+
+        var center=map.getCenter();
+
+        var response=await fetch(
+            "https://falling-sun-a5b9redline-ai.trabelsik514.workers.dev/",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    message:question,
+                    lat:center.lat,
+                    lon:center.lng
+                })
+            }
+        );
+
+        if(!response.ok){
+            throw new Error("AI API "+response.status);
+        }
+
+        var data=await response.json();
+
+        var box=document.getElementById("aiMessages");
+
+        if(box && box.lastChild){
+            box.removeChild(box.lastChild);
+        }
+
+        addAI(
+            "bot",
+            data.answer ||
+            "❌ لم تصل إجابة من مساعد الصياد."
+        );
+
+    }catch(error){
+
+        console.log("AI error:",error);
+
+        var box=document.getElementById("aiMessages");
+
+        if(box && box.lastChild){
+            box.removeChild(box.lastChild);
+        }
+
+        addAI(
+            "bot",
+            "❌ تعذر الاتصال بمساعد الصياد حاليًا."
+        );
+    }
+}
 function toggleTheme(){isDark=!isDark;
 document.body.classList.toggle('light',!isDark);
 document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
