@@ -32,7 +32,7 @@ input,button{font:inherit}.input,.btn{width:100%;height:44px;border-radius:11px;
 <div class="app">
 <header class="top">
 <div class="brand"><div class="logo">🎣</div><div><h1>RED LINE FISHING</h1><small>FISHING PLANNER</small></div></div>
-<button class="btn" style="width:auto;padding:0 12px" id="lang" onclick="toggleLang()">🌐 FR</button>
+<div style="display:flex;gap:8px;align-items:center"><button class="btn" style="width:auto;padding:0 12px" onclick="goBackToMap()">↩️ <span id="backText">العودة للخريطة</span></button><button class="btn" style="width:auto;padding:0 12px" id="lang" onclick="toggleLang()">🌐 FR</button></div>
 </header>
 <section class="hero">
 <h2 id="title">🎣 مخطط الصيد الذكي</h2>
@@ -111,7 +111,8 @@ if(
     },500);
 }
 
-function toggleLang(){lang=lang==="ar"?"fr":"ar";$("lang").textContent=lang==="ar"?"🌐 FR":"🌐 AR";document.documentElement.dir=lang==="ar"?"rtl":"ltr";$("title").textContent=lang==="ar"?"🎣 مخطط الصيد الذكي":"🎣 Planificateur de pêche";$("subtitle").textContent=lang==="ar"?"اكتب اسم المنطقة، اختر التاريخ، وسنحلل الطقس والبحر ونحدد أفضل ساعات الصيد.":"Saisissez une zone et une date pour analyser la météo, la mer et les meilleures heures.";$("plabel").textContent=lang==="ar"?"📍 منطقة الصيد":"📍 Zone de pêche";$("dlabel").textContent=lang==="ar"?"📅 التاريخ":"📅 Date";$("go").textContent=lang==="ar"?"🎯 تحليل الصيد":"🎯 Analyser";$("hoursTitle").textContent=lang==="ar"?"🕐 أفضل 3 ساعات للصيد":"🕐 3 meilleures heures";}
+function goBackToMap(){window.location.href="index.html";}
+function toggleLang(){lang=lang==="ar"?"fr":"ar";$("lang").textContent=lang==="ar"?"🌐 FR":"🌐 AR";document.documentElement.dir=lang==="ar"?"rtl":"ltr";$("title").textContent=lang==="ar"?"🎣 مخطط الصيد الذكي":"🎣 Planificateur de pêche";$("backText").textContent=lang==="ar"?"العودة للخريطة":"Retour à la carte";$("subtitle").textContent=lang==="ar"?"اكتب اسم المنطقة، اختر التاريخ، وسنحلل الطقس والبحر ونحدد أفضل ساعات الصيد.":"Saisissez une zone et une date pour analyser la météo, la mer et les meilleures heures.";$("plabel").textContent=lang==="ar"?"📍 منطقة الصيد":"📍 Zone de pêche";$("dlabel").textContent=lang==="ar"?"📅 التاريخ":"📅 Date";$("go").textContent=lang==="ar"?"🎯 تحليل الصيد":"🎯 Analyser";$("hoursTitle").textContent=lang==="ar"?"🕐 أفضل 3 ساعات للصيد":"🕐 3 meilleures heures";}
 let timer;
 $("place").oninput=()=>{clearTimeout(timer);let q=$("place").value.trim();if(q.length<2){$("results").style.display="none";return}timer=setTimeout(()=>search(q),300)};
 async function search(q){try{let d=await fetch(GEO+"?name="+encodeURIComponent(q)+"&count=6&language="+lang+"&format=json").then(r=>r.json());$("results").innerHTML="";(d.results||[]).forEach(x=>{let e=document.createElement("div");e.className="result";e.innerHTML="<b>"+esc(x.name)+"</b><small>"+esc(x.admin1||"")+" • "+esc(x.country||"")+"</small>";e.onclick=()=>{selected={lat:x.latitude,lon:x.longitude,name:x.name,country:x.country||""};$("place").value=x.name+" — "+(x.country||"");$("results").style.display="none"};$("results").appendChild(e)});$("results").style.display=d.results?.length?"block":"none"}catch(e){}}
