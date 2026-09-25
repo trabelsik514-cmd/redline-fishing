@@ -448,38 +448,124 @@ async function sendAI(){
 
     addAI("user",question);
 
-    addAI("bot","⏳ جاري البحث عن بيانات الطقس والبحر...");
+    addAI(
+        "bot",
+        "⏳ جاري قراءة الطقس والبحر في موقع الخريطة..."
+    );
 
     try{
 
         var center=map.getCenter();
 
-        var response=await fetch(
-            "https://falling-sun-a5b9redline-ai.trabelsik514.workers.dev/",
-            {
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json"
-                },
-                body:JSON.stringify({
-                    message:question,
-                    lat:center.lat,
-                    lon:center.lng
-                })
-            }
-        );
+        var lat=center.lat;
+        var lon=center.lng;
 
-        if(!response.ok){
-            throw new Error("AI API "+response.status);
-        }
+        var weatherURL=
+            "https://api.open-meteo.com/v1/forecast"+
+            "?latitude="+lat+
+            "&longitude="+lon+
+            "&current=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weather_code"+
+            "&daily=temperature_2m_max,temperature_2m_min,wind_speed_10m_max"+
+            "&timezone=auto";
 
-        var data=await response.json();
+        var marineURL=
+            "https://marine-api.open-meteo.com/v1/marine"+
+            "?latitude="+lat+
+            "&longitude="+lon+
+            "&current=wave_height,wave_direction,wave_period"+
+            "&daily=wave_height_max"+
+            "&timezone=auto";
+
+        var results=await Promise.all([
+
+            fetch(weatherURL).then(function(r){
+                if(!r.ok)throw new Error("Weather API");
+                return r.json();
+            }),
+
+            fetch(marineURL).then(function(r){
+                if(!r.ok)throw new Error("Marine API");
+                return r.json();
+            })
+
+        ]);
+
+        var w=results[0];
+        var m=results[1];
+
+        var c=w.current;
+        var sea=m.current || {};
+
+        var wind=(c.wind_speed_10m/1.852).toFixed(1);
+        var gust=(c.wind_gusts_10m/1.852).toFixed(1);
+
+        var wave=
+            sea.wave_height!=null
+            ? Number(sea.wave_height).toFixed(2)
+            : "--";
+
+        var wavePeriod=
+            sea.wave_period!=null
+            ? Number(sea.wave_period).toFixed(1)
+            : "--";
+
+        var direction=
+            windDirName(c.wind_direction_10m);
+
+        var seaDirection=
+            sea.wave_direction!=null
+            ? windDirName(sea.wave_direction)
+            : "--";
+
+        var answer=
+
+            "📍 الموقع الحالي على الخريطة\n"+
+            "Latitude: "+lat.toFixed(4)+"\n"+
+            "Longitude: "+lon.toFixed(4)+"\n\n"+
+
+            "🌡️ الحرارة: "+c.temperature_2m+" °C\n"+
+            "🌬️ الرياح: "+wind+" nd\n"+
+            "💨 الهبات: "+gust+" nd\n"+
+            "🧭 اتجاه الرياح: "+direction+"\n\n"+
+
+            "🌊 حالة البحر\n"+
+            "ارتفاع الموج: "+wave+" m\n"+
+            "اتجاه الموج: "+seaDirection+"\n"+
+            "فترة الموج: "+wavePeriod+" s\n\n"+
+
+            (
+                Number(wind)<15
+                ? "🟢 الرياح الحالية معتدلة."
+                : Number(wind)<25
+                ? "🟡 الرياح قوية نسبيًا، انتبه."
+                : "🔴 الرياح قوية، يجب الحذر."
+            );
 
         var box=document.getElementById("aiMessages");
 
         if(box && box.lastChild){
             box.removeChild(box.lastChild);
         }
+
+        addAI("bot",answer);
+
+    }catch(error){
+
+        console.log("Fishing Assistant:",error);
+
+        var box=document.getElementById("aiMessages");
+
+        if(box && box.lastChild){
+            box.removeChild(box.lastChild);
+        }
+
+        addAI(
+            "bot",
+            "❌ تعذر الحصول على بيانات الطقس والبحر الآن.\n"+
+            "تأكد من اتصال الإنترنت ثم حاول مرة أخرى."
+        );
+    }
+}
 
         addAI(
             "bot",
